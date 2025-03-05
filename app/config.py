@@ -25,3 +25,26 @@ settings = Settings()
 log_file_path = os.path.join(os.path.dirname(__file__), "log.txt")
 logger.add(log_file_path, format=settings.FORMAT_LOG, level="INFO", rotation=settings.LOG_ROTATION)
 
+log_config = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "default": {
+            "()": "uvicorn.logging.DefaultFormatter",
+            "fmt": "%(asctime)s | %(levelname)s | %(message)s",
+            "datefmt": "%Y-%m-%d at %H:%M:%S",
+        },
+    },
+    "handlers": {
+        "default": {
+            "formatter": "default",
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
+        },
+    },
+    "loggers": {
+        "uvicorn": {"handlers": ["default"], "level": "INFO"},
+        "uvicorn.access": {"handlers": ["default"], "level": "INFO"},
+    },
+}
+
