@@ -28,7 +28,7 @@ MoodTracker Bot is a simple and efficient bot designed to help you track your mo
 
 1. Run the bot:
     ```bash
-    python bot.py
+    python -m app.main
     ```
 2. Follow the on-screen instructions to log your mood.
 
