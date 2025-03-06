@@ -7,8 +7,7 @@ from loguru import logger
 
 from app.bot import bot_factory
 from app.config import settings
-
-logger.info("Application started")
+from icecream import ic
 
 
 # The @asynccontextmanager decorator is used to define an asynchronous context manager
@@ -32,4 +31,19 @@ async def root():
 
 # Run Uvicorn only if the script is executed directly
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn_log_config = uvicorn.config.LOGGING_CONFIG
+    uvicorn_log_config["formatters"]["default"]["fmt"] = (
+        "%(asctime)s | %(levelname)s | %(message)s"
+    )
+    uvicorn_log_config["formatters"]["default"]["datefmt"] = "%Y-%m-%d %H:%M:%S"
+    # uvicorn_log_config["formatters"]["default"]["use_colors"] = True
+    # ic(uvicorn_log_config)
+    logger.info("Application started")
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        log_config=uvicorn_log_config,
+        use_colors=True,
+    )

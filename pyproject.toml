@@ -25,4 +25,7 @@ dependencies = [
 lint = [
     "ruff>=0.9.9",
 ]
+dev = [
+    "icecream>=2.1.4",
+]
 
