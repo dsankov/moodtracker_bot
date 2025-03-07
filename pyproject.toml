@@ -10,7 +10,7 @@ dependencies = [
     "aiogram_dialog==2.3.1",
     "sqlalchemy==2.0.38",
     "pydantic==2.10.6",
-    "pydantic_settings==2.7.1", 
+    "pydantic_settings==2.7.1",
     "loguru==0.7.3",
     "aiosqlite==0.21.0",
     "alembic==1.14.1",
@@ -19,6 +19,7 @@ dependencies = [
     # "httpx==0.28.1",
     # "apscheduler==3.11.0",
     # "pytz==2024.2",
+    "httpx>=0.28.1",
 ]
 
 [dependency-groups]
