@@ -25,6 +25,7 @@ async def get_ngrok_url():
         logger.error(f"Error fetching ngrok URL: {e}")
     return None
 
+
 # The @asynccontextmanager decorator is used to define an asynchronous context manager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,7 +39,7 @@ async def lifespan(app: FastAPI):
     #     drop_pending_updates=True,
     #     # allowed_updates=bot_factory.dp.resolve_used_update_types(),
     # )
-    
+
     ngrok_url = await get_ngrok_url()
     if ngrok_url:
         webhook_url = f"{ngrok_url}/webhook"
@@ -52,7 +53,6 @@ async def lifespan(app: FastAPI):
     else:
         logger.error("Failed to set webhook: ngrok URL not found")
 
-    
     # webhook_info = await bot_factory.bot.get_webhook_info()
     # logger.info(webhook_info.url)
     # logger.info((await bot_factory.bot.get_webhook_info().).url)
@@ -60,9 +60,9 @@ async def lifespan(app: FastAPI):
     #     logger.success(f"Webhook successfully set to {webhook_url}")
     # else:
     #     logger.error(f"Failed to set webhook to {webhook_url}")
-    
+
     yield
-    
+
     await bot_factory.stop_bot()
     logger.info(f"Lifespan for {app.title} ended")
 
@@ -81,7 +81,7 @@ async def webhook(request: Request):
     logger.info(f"Processing webhook request")
     update_data = await request.json()
     update = Update.model_validate(update_data, context={"bot": bot_factory.bot})
-    await bot_factory.dp.process_update(update)
+    await bot_factory.dp._process_update(bot=bot_factory.bot, update=update)
     logger.info(f"Webhook request processed")
     return {"ok": True}
 
