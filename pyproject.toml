@@ -23,10 +23,9 @@ dependencies = [
 ]
 
 [dependency-groups]
-lint = [
-    "ruff>=0.9.9",
-]
-dev = [
-    "icecream>=2.1.4",
-]
+lint = ["ruff>=0.9.9"]
+dev = ["icecream>=2.1.4"]
 
+[tool.ruff.lint]
+select = ["ALL"]
+ignore=["F541"]

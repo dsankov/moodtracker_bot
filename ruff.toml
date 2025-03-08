@@ -1,0 +1,7 @@
+select = ["ALL"]
+ignore = [
+    "F541",   # f-string without any placeholders
+    "ERA001", # commented-out code
+    "ANN",    # missing type annotations
+    "D",      # missing docstring
+]
