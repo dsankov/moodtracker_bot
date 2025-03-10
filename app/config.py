@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -19,7 +18,7 @@ class Settings(BaseSettings):
     BASE_URL: str = ""
 
     model_config = SettingsConfigDict(
-        env_file=(Path(__file__).resolve().parent / ".." / ".env").resolve(),
+        env_file=(Path(__file__).parent / ".." / ".env").resolve(),
     )
 
     # Function to get the ngrok URL
@@ -40,22 +39,23 @@ class Settings(BaseSettings):
 
     @property
     async def hook_url(self) -> str:
-        if settings.BASE_URL.endswith("ngrok-free.app"):
-            ngrok_url = await self._get_ngrok_url()
-            if ngrok_url:
-                return f"{ngrok_url}/webhook"
-            else:
-                logger.error("Failed to get ngrok URL")
-                raise Exception("Failed to get ngrok URL")
-        else:
+        if not settings.BASE_URL.endswith("ngrok-free.app"):
             return f"{self.BASE_URL}/webhook"
+
+        ngrok_url = await self._get_ngrok_url()
+        if not ngrok_url:
+            logger.error("Failed to get ngrok URL")
+            error_msg = "Failed to get ngrok URL"
+            raise httpx.ConnectError(error_msg)
+
+        return f"{ngrok_url}/webhook"
 
 
 settings = Settings()
 
 logger.remove()
 
-log_file_path = os.path.join(os.path.dirname(__file__), "log.txt")
+log_file_path = Path(__file__).resolve().parent / "log.txt"
 logger.add(sys.stdout, format=settings.FORMAT_LOG, level="INFO", colorize=True)
 logger.add(
     log_file_path,

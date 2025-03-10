@@ -1,3 +1,5 @@
+import contextlib
+
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -30,17 +32,13 @@ async def start_bot():
     dp.include_router(user_router)
 
     for admin_id in settings.ADMIN_IDS:
-        try:
+        with contextlib.suppress(Exception):
             await bot.send_message(admin_id, f"mood_trackerbot started")
-        except:
-            pass
     logger.info("Bot started")
 
 
 async def stop_bot():
     for admin_id in settings.ADMIN_IDS:
-        try:
+        with contextlib.suppress(Exception):
             await bot.send_message(admin_id, f"mood_trackerbot stopped")
-        except:
-            pass
     logger.info("Bot stopped")

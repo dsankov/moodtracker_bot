@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 import uvicorn
+from aiogram.exceptions import AiogramError
 from aiogram.types import Update
 from fastapi import FastAPI, Request
 from loguru import logger
@@ -24,13 +25,13 @@ async def lifespan(app: FastAPI):
     )
     logger.success(f"Webhook set to {webhook_url}")
 
-
     webhook_info = await bot_factory.bot.get_webhook_info()
     if webhook_info.url == webhook_url:
         logger.success(f"Webhook successfully set to {webhook_url}")
     else:
         logger.error(f"Failed to set webhook to {webhook_url}")
-        raise Exception("Failed to set webhook")
+        error_msg = "Failed to set webhook"
+        raise AiogramError(error_msg)
 
     yield
 
@@ -40,22 +41,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
-@app.get("/")
-async def root():
-    logger.info(f"Processing root request")
-    return {"message": "Hello, FastAPI!"}
-
-
 @app.post("/webhook")
 async def webhook(request: Request) -> None:
     """Handle incoming webhook requests from Telegram.
 
     Args:
         request (Request): The incoming request object containing the update data.
-
-    Returns:
-        dict: A dictionary indicating the success of the request processing.
 
     """
     logger.info(f"Processing webhook request")
