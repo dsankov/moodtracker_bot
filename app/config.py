@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 
+import httpx
 from loguru import logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -21,9 +22,33 @@ class Settings(BaseSettings):
         env_file=(Path(__file__).resolve().parent / ".." / ".env").resolve(),
     )
 
+    # Function to get the ngrok URL
+    async def _get_ngrok_url(self) -> str:
+        """Get the ngrok URL for the current session."""
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get("http://localhost:4040/api/tunnels")
+                response.raise_for_status()
+                tunnels = response.json()["tunnels"]
+                for tunnel in tunnels:
+                    if tunnel["proto"] == "https":
+                        return tunnel["public_url"]
+        except httpx.RequestError as e:
+            logger.error(f"Error fetching ngrok URL: {e}")
+        return None
+
     @property
-    def hook_url(self) -> str:
-        return f"{self.BASE_URL}/webhook"
+    async def hook_url(self) -> str:
+        if settings.BASE_URL.endswith("ngrok-free.app"):
+            ngrok_url = await self._get_ngrok_url()
+            if ngrok_url:
+                return f"{ngrok_url}/webhook"
+            else:
+                logger.error("Failed to get ngrok URL")
+                raise Exception("Failed to get ngrok URL")
+        else:
+            return f"{self.BASE_URL}/webhook"
 
 
 settings = Settings()
