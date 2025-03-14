@@ -30,8 +30,13 @@ settings = Settings()
 
 logger.remove()
 
+<<<<<<< Updated upstream
 log_file_path = os.path.join(os.path.dirname(__file__), "log.txt")
 logger.add(sys.stdout, format=settings.FORMAT_LOG, level="INFO", colorize=True)
+=======
+log_file_path = Path(__file__).resolve().parent / "log.txt"
+logger.add(sys.stdout, format=settings.FORMAT_LOG, level="DEBUG", colorize=True)
+>>>>>>> Stashed changes
 logger.add(
     log_file_path,
     format=settings.FORMAT_LOG,

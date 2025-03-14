@@ -69,6 +69,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+<<<<<<< Updated upstream
 
 @app.get("/")
 async def root():
@@ -76,11 +77,37 @@ async def root():
     return {"message": "Hello, FastAPI!"}
 
 
+=======
+@app.get("/")
+async def root() -> dict:
+    """Root endpoint."""
+    return {"message": "Hello, World!"}
+
+
+@app.get("/user/{user_id}")
+async def get_user(user_id: int, is_admin: bool | None = None) -> None:
+    """Get user data by ID."""
+
+    logger.debug(f"Getting user with ID {user_id}")
+
+
+@app.post("/user/add")
+async def add_user(user_data: dict) -> None:
+    """Add a new user to the database."""
+    logger.debug(f"Adding new user: {user_data}")
+    return {"status": "success"}
+
+>>>>>>> Stashed changes
 @app.post("/webhook")
 async def webhook(request: Request):
     logger.info(f"Processing webhook request")
-    update_data = await request.json()
-    update = Update.model_validate(update_data, context={"bot": bot_factory.bot})
+    try:
+        update_data = await request.json()
+        update = Update.model_validate(update_data, context={"bot": bot_factory.bot})
+    except Exception as e:
+        logger.error(f"Failed to validate update data")
+        return
+
     await bot_factory.dp._process_update(bot=bot_factory.bot, update=update)
     logger.info(f"Webhook request processed")
     return {"ok": True}
@@ -98,7 +125,7 @@ if __name__ == "__main__":
     logger.info("Application started")
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
+        host="127.0.0.1",
         port=8000,
         reload=True,
         log_config=uvicorn_log_config,
