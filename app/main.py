@@ -69,15 +69,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-<<<<<<< Updated upstream
-
-@app.get("/")
-async def root():
-    logger.info(f"Processing root request")
-    return {"message": "Hello, FastAPI!"}
-
-
-=======
 @app.get("/")
 async def root() -> dict:
     """Root endpoint."""
@@ -89,6 +80,7 @@ async def get_user(user_id: int, is_admin: bool | None = None) -> None:
     """Get user data by ID."""
 
     logger.debug(f"Getting user with ID {user_id}")
+    return {"user_id": user_id, "is_admin": is_admin}
 
 
 @app.post("/user/add")
@@ -97,7 +89,6 @@ async def add_user(user_data: dict) -> None:
     logger.debug(f"Adding new user: {user_data}")
     return {"status": "success"}
 
->>>>>>> Stashed changes
 @app.post("/webhook")
 async def webhook(request: Request):
     logger.info(f"Processing webhook request")
