@@ -1,14 +1,14 @@
 from contextlib import asynccontextmanager
 
+import httpx
 import uvicorn
 from aiogram.types import Update
-from fastapi import FastAPI, Request
+from fastapi import Body, FastAPI, Header, Request
+from icecream import ic
 from loguru import logger
 
 from app.bot import bot_factory
 from app.config import settings
-from icecream import ic
-import httpx
 
 
 # Function to get the ngrok URL
@@ -74,20 +74,20 @@ async def root() -> dict:
     """Root endpoint."""
     return {"message": "Hello, World!"}
 
-
-@app.get("/user/{user_id}")
-async def get_user(user_id: int, is_admin: bool | None = None) -> None:
-    """Get user data by ID."""
-
-    logger.debug(f"Getting user with ID {user_id}")
-    return {"user_id": user_id, "is_admin": is_admin}
-
-
 @app.post("/user/add")
-async def add_user(user_data: dict) -> None:
+async def add_user(user_data: str = Header()) -> dict:
     """Add a new user to the database."""
     logger.debug(f"Adding new user: {user_data}")
-    return {"status": "success"}
+    return { "user_data": user_data}
+
+# @app.get("/user/{user_id}")
+# async def get_user(user_id: int, is_admin: bool | None = None) -> None:
+#     """Get user data by ID."""
+
+#     logger.debug(f"Getting user with ID {user_id}")
+#     return {"user_id": user_id, "is_admin": is_admin}
+
+
 
 @app.post("/webhook")
 async def webhook(request: Request):
@@ -111,8 +111,6 @@ if __name__ == "__main__":
         "%(asctime)s | %(levelname)s | %(message)s"
     )
     uvicorn_log_config["formatters"]["default"]["datefmt"] = "%Y-%m-%d %H:%M:%S"
-    # uvicorn_log_config["formatters"]["default"]["use_colors"] = True
-    # ic(uvicorn_log_config)
     logger.info("Application started")
     uvicorn.run(
         "app.main:app",
