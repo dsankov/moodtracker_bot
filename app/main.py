@@ -5,7 +5,7 @@ import uvicorn
 from aiogram.exceptions import AiogramError
 from aiogram.types import Update
 from fastapi import Body, FastAPI, Header, Request
-from icecream import ic
+# from icecream import ic
 from loguru import logger
 
 from app.bot import bot_factory

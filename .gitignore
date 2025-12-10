@@ -11,3 +11,4 @@ wheels/
 
 .env
 app/log.txt
+.codemap/
