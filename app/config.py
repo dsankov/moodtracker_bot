@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     DB_URL: str = "sqlite+aiosqlite:///data/db.sqlite3"
 
     BASE_URL: str = ""
+    NGROK_AUTHTOKEN: str = ""
+    NGROK_URL: str = ""
 
     model_config = SettingsConfigDict(
         env_file=(Path(__file__).parent / ".." / ".env").resolve(),
@@ -24,6 +26,9 @@ class Settings(BaseSettings):
     # Function to get the ngrok URL
     async def _get_ngrok_url(self) -> str:
         """Get the ngrok URL for the current session."""
+        # If NGROK_URL is set in environment, use it directly
+        # if self.NGROK_URL:
+        #     return f"https://{self.NGROK_URL}"
 
         try:
             async with httpx.AsyncClient() as client:
@@ -33,15 +38,16 @@ class Settings(BaseSettings):
                 for tunnel in tunnels:
                     if tunnel["proto"] == "https":
                         return tunnel["public_url"]
-        except httpx.RequestError as e:
+        except (httpx.RequestError, httpx.ConnectError) as e:
             logger.error(f"Error fetching ngrok URL: {e}")
         return None
 
     @property
     async def hook_url(self) -> str:
+        logger.info(f"{settings.BASE_URL=}")
         if not settings.BASE_URL.endswith("ngrok-free.app"):
             return f"{self.BASE_URL}/webhook"
-
+        logger.debug("Fetching ngrok_url")
         ngrok_url = await self._get_ngrok_url()
         if not ngrok_url:
             logger.error("Failed to get ngrok URL")
