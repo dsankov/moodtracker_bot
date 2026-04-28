@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     LOG_ROTATION: str = "10 MB"
     DB_URL: str = "sqlite+aiosqlite:///data/db.sqlite3"
 
+    # Environment: "development" (ngrok) or "production" (nginx + domain)
+    APP_ENV: str = "development"
+
     BASE_URL: str = ""
     NGROK_AUTHTOKEN: str = ""
     NGROK_URL: str = ""
@@ -23,13 +26,13 @@ class Settings(BaseSettings):
         env_file=(Path(__file__).parent / ".." / ".env").resolve(),
     )
 
-    # Function to get the ngrok URL
+    @property
+    def is_production(self) -> bool:
+        return self.APP_ENV == "production"
+
+    # Function to get the ngrok URL (development only)
     async def _get_ngrok_url(self) -> str:
         """Get the ngrok URL for the current session."""
-        # If NGROK_URL is set in environment, use it directly
-        # if self.NGROK_URL:
-        #     return f"https://{self.NGROK_URL}"
-
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get("http://ngrok:4040/api/tunnels")
@@ -44,9 +47,13 @@ class Settings(BaseSettings):
 
     @property
     async def hook_url(self) -> str:
-        logger.info(f"{settings.BASE_URL=}")
-        if not settings.BASE_URL.endswith("ngrok-free.app"):
+        logger.info(f"{settings.APP_ENV=}, {settings.BASE_URL=}")
+
+        if self.is_production:
+            # Production: use BASE_URL directly (nginx handles SSL)
             return f"{self.BASE_URL}/webhook"
+
+        # Development: resolve ngrok tunnel URL
         logger.debug("Fetching ngrok_url")
         ngrok_url = await self._get_ngrok_url()
         if not ngrok_url:

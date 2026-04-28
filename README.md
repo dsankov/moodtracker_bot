@@ -21,7 +21,7 @@ MoodTracker Bot is a simple and efficient bot designed to help you track your mo
     ```
 3. Install the required dependencies:
     ```bash
-    pip install -r requirements.txt
+    uv pip install -r requirements.txt
     ```
 
 ## Usage
