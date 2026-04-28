@@ -1,6 +1,6 @@
 from aiogram import F
 from aiogram.dispatcher.router import Router
-from aiogram.filters import CommandStart
+from aiogram.filters import Command, CommandStart
 from aiogram.types import Message
 
 router = Router()
@@ -12,4 +12,15 @@ async def cmd_start(message: Message):
     await message.answer(f"Hello, {user_data['first_name']}!")
     await message.answer(
         "I am a mood tracker bot. I can help you track your mood and provide insights.",
+    )
+
+
+@router.message(Command("help"))
+async def cmd_help(message: Message):
+    await message.answer(
+        """
+        Hello!
+        /start for restart
+        /help for this message
+        """,
     )

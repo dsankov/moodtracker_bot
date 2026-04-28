@@ -12,7 +12,8 @@ from app.bot.user.router import router as user_router
 from app.config import settings
 
 bot = Bot(
-    token=settings.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    token=settings.BOT_TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
 )
 dp = Dispatcher(storage=MemoryStorage())
 
@@ -22,6 +23,7 @@ async def set_commands():
         BotCommand(command="start", description="start bot"),
         BotCommand(command="help", description="help"),
     ]
+    logger.debug("SSetting commands")
     await bot.set_my_commands(commands, BotCommandScopeDefault())
 
 

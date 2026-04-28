@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: moodtracker_app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./app:/app/app
+    networks:
+      - moodtracker_network
+    restart: unless-stopped
+    depends_on:
+      - ngrok
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: moodtracker_ngrok
+    command: http --domain=${NGROK_URL} app:8000
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml
+    networks:
+      - moodtracker_network
+    restart: unless-stopped
+
+networks:
+  moodtracker_network:
+    driver: bridge
+
+volumes:
+  data:

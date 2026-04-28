@@ -1,0 +1,38 @@
+# Version control
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+.roo
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.venv
+venv
+
+# Docker
+Dockerfile
+docker-compose.yml
+
+# Project files
+.env
+.env.example
+plans/
+*.md
+AGENTS.md
+Makefile
+justfile
+ruff.toml
+.python-version
+uv.lock
+pyproject.toml
+requirements.in
+ngrok.yml
+
+# Data
+data/

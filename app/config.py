@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get("http://localhost:4040/api/tunnels")
+                response = await client.get("http://ngrok:4040/api/tunnels")
                 response.raise_for_status()
                 tunnels = response.json()["tunnels"]
                 for tunnel in tunnels:
