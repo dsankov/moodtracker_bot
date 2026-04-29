@@ -27,6 +27,7 @@ This file provides guidance to agents when working with code in this repository.
 - Use `contextlib.suppress(Exception)` for error handling in bot operations
 - Pydantic models for configuration with BaseSettings
 - Async/await required throughout due to async database and bot operations
+- Always use keyword arguments (`param=value`) in function/method calls where named parameters exist — e.g. `bot.send_message(chat_id=admin_id, text=...)`, not `bot.send_message(admin_id, "...")`. Exception: fluent/builder APIs (SQLAlchemy `.where()`, `.limit()`) and positional-only parameters (e.g. `AiogramError(msg)`) remain positional
 
 ## Critical Patterns
 

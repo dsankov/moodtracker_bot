@@ -15,7 +15,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from app.config import settings
 
 engine = create_async_engine(url=settings.DB_URL, echo=True)
-async_session_maker = async_sessionmaker(engine, class_=AsyncSession)
+async_session_maker = async_sessionmaker(bind=engine, class_=AsyncSession)
 
 
 class Base(AsyncAttrs, DeclarativeBase):

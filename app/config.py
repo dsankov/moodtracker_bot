@@ -35,7 +35,7 @@ class Settings(BaseSettings):
         """Get the ngrok URL for the current session."""
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get("http://ngrok:4040/api/tunnels")
+                response = await client.get(url="http://ngrok:4040/api/tunnels")
                 response.raise_for_status()
                 tunnels = response.json()["tunnels"]
                 for tunnel in tunnels:

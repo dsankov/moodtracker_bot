@@ -1,10 +1,8 @@
 import asyncio
 from contextlib import asynccontextmanager
 
-import httpx
 import uvicorn
 from aiogram.exceptions import AiogramError
-from aiogram.types import Update
 from fastapi import FastAPI, Header, Request
 
 # from icecream import ic
@@ -14,21 +12,6 @@ from alembic import command
 from alembic.config import Config
 from app.bot import bot_factory
 from app.config import settings
-
-
-# Function to get the ngrok URL
-async def get_ngrok_url():
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get("http://ngrok:4040/api/tunnels")
-            response.raise_for_status()
-            tunnels = response.json()["tunnels"]
-            for tunnel in tunnels:
-                if tunnel["proto"] == "https":
-                    return tunnel["public_url"]
-    except httpx.RequestError as e:
-        logger.error(f"Error fetching ngrok URL: {e}")
-    return None
 
 
 # The @asynccontextmanager decorator is used to define an asynchronous context manager
@@ -42,7 +25,7 @@ async def lifespan(app: FastAPI):
 
     # Run database migrations (in a thread since alembic uses asyncio.run internally)
     logger.info("Running database migrations...")
-    alembic_cfg = Config("alembic.ini")
+    alembic_cfg = Config(file_="alembic.ini")
     await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
     logger.success("Database migrations complete")
 
@@ -74,26 +57,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/")
-async def root() -> dict:
-    """Root endpoint."""
-    return {"message": "Hello, World!"}
-
-
-@app.post("/user/add")
-async def add_user(user_data: str = Header()) -> dict:
-    """Add a new user to the database."""
-    logger.debug(f"Adding new user: {user_data}")
-    return {"user_data": user_data}
-
-
-# @app.get("/user/{user_id}")
-# async def get_user(user_id: int, is_admin: bool | None = None) -> None:
-#     """Get user data by ID."""
-
-#     logger.debug(f"Getting user with ID {user_id}")
-#     return {"user_id": user_id, "is_admin": is_admin}
-
 
 @app.post("/webhook")
 async def webhook(request: Request) -> None:
@@ -103,16 +66,10 @@ async def webhook(request: Request) -> None:
         request (Request): The incoming request object containing the update data.
 
     """
-    logger.info(f"Processing webhook request")
-    try:
-        update_data = await request.json()
-        update = Update.model_validate(update_data, context={"bot": bot_factory.bot})
-    except Exception:
-        logger.error(f"Failed to validate update data")
-        return
-
-    await bot_factory.dp._process_update(bot=bot_factory.bot, update=update)
-    logger.info(f"Webhook request processed")
+    logger.info("Processing webhook request")
+    update_data = await request.json()
+    await bot_factory.dp.feed_raw_update(bot=bot_factory.bot, update=update_data)
+    logger.info("Webhook request processed")
 
 
 # Run Uvicorn only if the script is executed directly

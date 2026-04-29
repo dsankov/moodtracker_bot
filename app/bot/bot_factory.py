@@ -27,7 +27,7 @@ async def set_commands():
         BotCommand(command="help", description="help"),
     ]
     logger.debug("SSetting commands")
-    await bot.set_my_commands(commands, BotCommandScopeDefault())
+    await bot.set_my_commands(commands=commands, scope=BotCommandScopeDefault())
 
 
 async def start_bot():
@@ -38,12 +38,12 @@ async def start_bot():
 
     for admin_id in settings.ADMIN_IDS:
         with contextlib.suppress(Exception):
-            await bot.send_message(admin_id, f"mood_trackerbot started")
+            await bot.send_message(chat_id=admin_id, text=f"mood_trackerbot started")
     logger.info("Bot started")
 
 
 async def stop_bot():
     for admin_id in settings.ADMIN_IDS:
         with contextlib.suppress(Exception):
-            await bot.send_message(admin_id, f"mood_trackerbot stopped")
+            await bot.send_message(chat_id=admin_id, text=f"mood_trackerbot stopped")
     logger.info("Bot stopped")
