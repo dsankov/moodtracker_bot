@@ -58,6 +58,12 @@ app = FastAPI(lifespan=lifespan)
 
 
 
+@app.get("/health_check")
+async def health_check() -> dict[str, str]:
+    """Lightweight liveness probe for deployment health checks."""
+    return {"status": "ok"}
+
+
 @app.post("/webhook")
 async def webhook(request: Request) -> None:
     """Handle incoming webhook requests from Telegram.

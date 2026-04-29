@@ -14,7 +14,7 @@ set -euo pipefail
 BRANCH="${1:-master}"
 REPO_DIR="$HOME/moodtracker_bot"
 COMPOSE_FILE="docker-compose.prod.yml"
-HEALTH_URL="http://127.0.0.1:8000/"
+HEALTH_URL="http://127.0.0.1:8000/health_check"
 HEALTH_TIMEOUT=30
 
 echo "=== Deploy started ==="
@@ -56,6 +56,10 @@ until curl -sf "$HEALTH_URL" -o /dev/null; do
     if [ "$ELAPSED" -ge "$HEALTH_TIMEOUT" ]; then
         echo ""
         echo "❌ Health check FAILED after ${HEALTH_TIMEOUT}s"
+        echo ""
+        echo "── Container logs (last 50 lines) ──────────────────"
+        docker compose -f "$COMPOSE_FILE" logs --tail=50 app 2>/dev/null || true
+        echo "── End container logs ──────────────────────────────"
         echo ""
         if [ -n "$PREV_IMAGE" ]; then
             echo "Rolling back to previous image: $PREV_IMAGE"
