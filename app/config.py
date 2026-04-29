@@ -51,14 +51,24 @@ class Settings(BaseSettings):
 
         if self.is_production:
             # Production: use BASE_URL directly (nginx handles SSL)
+            if not self.BASE_URL:
+                error_msg = (
+                    "BASE_URL is required in production mode. "
+                    "Set APP_ENV=production and BASE_URL=https://yourdomain.com in .env"
+                )
+                logger.error(error_msg)
+                raise ValueError(error_msg)
             return f"{self.BASE_URL}/webhook"
 
         # Development: resolve ngrok tunnel URL
         logger.debug("Fetching ngrok_url")
         ngrok_url = await self._get_ngrok_url()
         if not ngrok_url:
-            logger.error("Failed to get ngrok URL")
-            error_msg = "Failed to get ngrok URL"
+            error_msg = (
+                "Failed to get ngrok URL. "
+                "If running in production, set APP_ENV=production in .env"
+            )
+            logger.error(error_msg)
             raise httpx.ConnectError(error_msg)
 
         return f"{ngrok_url}/webhook"

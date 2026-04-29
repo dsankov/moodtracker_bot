@@ -31,6 +31,10 @@ async def get_ngrok_url():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Lifespan for {app.title} started")
+    mode = "PRODUCTION" if settings.is_production else "DEVELOPMENT"
+    logger.info(f"Running in {mode} mode (APP_ENV={settings.APP_ENV})")
+    if settings.is_production and not settings.BASE_URL:
+        logger.error("BASE_URL is required in production mode. Set it in .env")
     await bot_factory.start_bot()
 
     webhook_url = await settings.hook_url
