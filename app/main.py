@@ -1,13 +1,17 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 import httpx
 import uvicorn
 from aiogram.exceptions import AiogramError
 from aiogram.types import Update
-from fastapi import Body, FastAPI, Header, Request
+from fastapi import FastAPI, Header, Request
+
 # from icecream import ic
 from loguru import logger
 
+from alembic import command
+from alembic.config import Config
 from app.bot import bot_factory
 from app.config import settings
 
@@ -35,6 +39,13 @@ async def lifespan(app: FastAPI):
     logger.info(f"Running in {mode} mode (APP_ENV={settings.APP_ENV})")
     if settings.is_production and not settings.BASE_URL:
         logger.error("BASE_URL is required in production mode. Set it in .env")
+
+    # Run database migrations (in a thread since alembic uses asyncio.run internally)
+    logger.info("Running database migrations...")
+    alembic_cfg = Config("alembic.ini")
+    await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
+    logger.success("Database migrations complete")
+
     await bot_factory.start_bot()
 
     webhook_url = await settings.hook_url
@@ -62,16 +73,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
 @app.get("/")
 async def root() -> dict:
     """Root endpoint."""
     return {"message": "Hello, World!"}
 
+
 @app.post("/user/add")
 async def add_user(user_data: str = Header()) -> dict:
     """Add a new user to the database."""
     logger.debug(f"Adding new user: {user_data}")
-    return { "user_data": user_data}
+    return {"user_data": user_data}
+
 
 # @app.get("/user/{user_id}")
 # async def get_user(user_id: int, is_admin: bool | None = None) -> None:
@@ -79,7 +93,6 @@ async def add_user(user_data: str = Header()) -> dict:
 
 #     logger.debug(f"Getting user with ID {user_id}")
 #     return {"user_id": user_id, "is_admin": is_admin}
-
 
 
 @app.post("/webhook")
@@ -94,7 +107,7 @@ async def webhook(request: Request) -> None:
     try:
         update_data = await request.json()
         update = Update.model_validate(update_data, context={"bot": bot_factory.bot})
-    except Exception as e:
+    except Exception:
         logger.error(f"Failed to validate update data")
         return
 

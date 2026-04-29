@@ -13,3 +13,4 @@ wheels/
 app/log.txt
 .codemap/
 ngrok.yml
+data/

@@ -1,7 +1,18 @@
+[lint]
 select = ["ALL"]
 ignore = [
     "F541",   # f-string without any placeholders
     "ERA001", # commented-out code
     "ANN",    # missing type annotations
     "D",      # missing docstring
+    "COM812", # trailing comma (conflicts with formatter)
+    "FBT001", # boolean-typed positional argument
+    "FBT002", # boolean default positional argument
+    "FAST002", # FastAPI dependency without Annotated
+    "BLE001",  # blind exception
+    "SLF001",  # private member access
 ]
+
+[lint.per-file-ignores]
+"alembic/*" = ["INP001"]
+"alembic/versions/*" = ["INP001"]

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     FORMAT_LOG: str = "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
     LOG_ROTATION: str = "10 MB"
-    DB_URL: str = "sqlite+aiosqlite:///data/db.sqlite3"
+    DB_URL: str = "postgresql+asyncpg://moodtracker:changeme@postgres:5432/moodtracker"
 
     # Environment: "development" (ngrok) or "production" (nginx + domain)
     APP_ENV: str = "development"

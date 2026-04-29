@@ -1,8 +1,10 @@
-loguru        
-aiogram       
-fastapi       
-pydantic       
-uvicorn       
+loguru
+aiogram
+fastapi
+pydantic
+uvicorn
 aiogram_dialog
 pydantic_settings
 httpx
+asyncpg
+alembic

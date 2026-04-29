@@ -8,6 +8,7 @@ from aiogram.types import BotCommand, BotCommandScopeDefault
 from aiogram_dialog import setup_dialogs
 from loguru import logger
 
+from app.bot.middleware import UserTrackingMiddleware
 from app.bot.user.router import router as user_router
 from app.config import settings
 
@@ -16,6 +17,8 @@ bot = Bot(
     default=DefaultBotProperties(parse_mode=ParseMode.HTML),
 )
 dp = Dispatcher(storage=MemoryStorage())
+dp.message.middleware(UserTrackingMiddleware())
+dp.callback_query.middleware(UserTrackingMiddleware())
 
 
 async def set_commands():

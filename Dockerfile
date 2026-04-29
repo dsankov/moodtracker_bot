@@ -11,9 +11,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app/ ./app/
-
-# Create data directory for database
-RUN mkdir -p /app/data
+COPY alembic/ ./alembic/
+COPY alembic.ini ./
 
 # Expose port 8000
 EXPOSE 8000

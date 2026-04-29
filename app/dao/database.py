@@ -1,4 +1,5 @@
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime
 from decimal import Decimal
 
@@ -22,7 +23,9 @@ class Base(AsyncAttrs, DeclarativeBase):
 
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP, server_default=func.now(), onupdate=func.now(),
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
     def to_dict(self, exclude_none: bool = False):
@@ -42,3 +45,9 @@ class Base(AsyncAttrs, DeclarativeBase):
 
             data[column.key] = value
         return data
+
+
+@asynccontextmanager
+async def get_db_session():
+    async with async_session_maker() as session:
+        yield session
