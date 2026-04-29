@@ -1,3 +1,4 @@
+from aiogram.types import CallbackQuery
 from aiogram.fsm.state import State, StatesGroup
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import Button
@@ -54,6 +55,15 @@ async def returning_getter(
     }
 
 
+async def on_ok_clicked(
+    callback: CallbackQuery,
+    button: Button,
+    dialog_manager: DialogManager,
+) -> None:
+    """Close the dialog when the OK button is pressed."""
+    await dialog_manager.done()
+
+
 greeting_dialog = Dialog(
     # Window for new users
     Window(
@@ -63,7 +73,7 @@ greeting_dialog = Dialog(
             Const("I can help you track your mood and provide insights."),
             sep="\n",
         ),
-        Button(Const("OK"), id="ok_btn"),
+        Button(Const("OK"), id="ok_btn", on_click=on_ok_clicked),
         state=GreetingSG.welcome,
         getter=welcome_getter,
     ),
@@ -75,7 +85,7 @@ greeting_dialog = Dialog(
             Format("Last time you used /help: {last_help}"),
             sep="\n",
         ),
-        Button(Const("OK"), id="ok_btn"),
+        Button(Const("OK"), id="ok_btn", on_click=on_ok_clicked),
         state=GreetingSG.returning,
         getter=returning_getter,
     ),
