@@ -1,5 +1,5 @@
 .PHONY: build up down restart logs logs-app logs-ngrok clean help \
-        prod-build prod-up prod-down prod-logs prod-restart deploy-prod
+        prod-build prod-up prod-down prod-logs prod-restart deploy-prod deploy-dev
 
 help:
 	@echo "Available commands (development - uses ngrok):"
@@ -18,7 +18,8 @@ help:
 	@echo "  make prod-down    - Stop production container"
 	@echo "  make prod-logs    - Tail production logs"
 	@echo "  make prod-restart - Restart production container"
-	@echo "  make deploy-prod  - Git pull + rebuild + restart (run on VPS)"
+	@echo "  make deploy-prod  - Git pull + rebuild + restart (master, run on VPS)"
+	@echo "  make deploy-dev   - Git pull + rebuild + restart (develop, run on VPS)"
 	@echo ""
 	@echo "  make help         - Show this help message"
 
@@ -66,6 +67,7 @@ prod-restart:
 	docker compose -f docker-compose.prod.yml restart
 
 deploy-prod:
-	git pull
-	docker compose -f docker-compose.prod.yml build
-	docker compose -f docker-compose.prod.yml up -d
+	bash scripts/deploy.sh master
+
+deploy-dev:
+	bash scripts/deploy.sh develop
