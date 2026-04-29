@@ -8,6 +8,8 @@ from sqlalchemy import select
 from app.dao.models import User, UserActivity
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -60,5 +62,19 @@ class ActivityDAO:
         telegram_id: int,
     ) -> User | None:
         query = select(User).where(User.telegram_id == telegram_id)
+        result = await session.execute(query)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_last_help_usage(
+        session: AsyncSession,
+        user_id: str,
+    ) -> datetime | None:
+        query = (
+            select(UserActivity.created_at)
+            .where(UserActivity.user_id == user_id, UserActivity.command == "help")
+            .order_by(UserActivity.created_at.desc())
+            .limit(1)
+        )
         result = await session.execute(query)
         return result.scalar_one_or_none()
