@@ -38,6 +38,10 @@ This file provides guidance to agents when working with code in this repository.
 - Admin notifications sent to all ADMIN_IDS on bot start/stop
 - Loguru logging configured in `app/config.py` with rotation
 
+## Workflow
+
+- Always present a plan with specific files, key changes, and reasoning BEFORE implementing — wait for user approval before making any changes
+
 ## Gotchas
 
 - Database engine has typo: `enging` instead of `engine` in `app/dao/database.py`

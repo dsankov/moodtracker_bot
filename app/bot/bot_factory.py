@@ -9,6 +9,7 @@ from aiogram_dialog import setup_dialogs
 from loguru import logger
 
 from app.bot.middleware import UserTrackingMiddleware
+from app.bot.user.greeting_dialog import greeting_dialog
 from app.bot.user.router import router as user_router
 from app.config import settings
 
@@ -34,6 +35,7 @@ async def start_bot():
     logger.info("Starting bot")
     await set_commands()
     setup_dialogs(dp)
+    dp.include_router(greeting_dialog)
     dp.include_router(user_router)
 
     for admin_id in settings.ADMIN_IDS:
