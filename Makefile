@@ -1,12 +1,15 @@
-.PHONY: build up down restart logs logs-app logs-ngrok clean help \
+.PHONY: build up up-all down down-all restart restart-all logs logs-app logs-ngrok clean help \
         prod-build prod-up prod-down prod-logs prod-restart deploy-prod deploy-dev
 
 help:
 	@echo "Available commands (development - uses ngrok):"
 	@echo "  make build        - Build Docker images"
-	@echo "  make up           - Start all services (app + ngrok)"
-	@echo "  make down         - Stop all services"
-	@echo "  make restart      - Restart all services"
+	@echo "  make up           - Start app only (deps auto-start if needed)"
+	@echo "  make up-all       - Start all services (app + postgres + ngrok)"
+	@echo "  make down         - Stop app only (postgres/ngrok keep running)"
+	@echo "  make down-all     - Stop and remove all services"
+	@echo "  make restart      - Restart app only"
+	@echo "  make restart-all  - Restart all services"
 	@echo "  make logs         - View logs from all services"
 	@echo "  make logs-app     - View logs from app service"
 	@echo "  make logs-ngrok   - View logs from ngrok service"
@@ -29,12 +32,21 @@ build:
 	docker compose build
 
 up:
+	docker compose up -d app
+
+up-all:
 	docker compose up -d
 
 down:
+	docker compose stop app
+
+down-all:
 	docker compose down
 
 restart:
+	docker compose restart app
+
+restart-all:
 	docker compose restart
 
 logs:
