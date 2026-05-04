@@ -4,6 +4,7 @@ from aiogram.types import Message
 from aiogram_dialog import DialogManager
 
 from app.bot.user.greeting_dialog import GreetingSG
+from app.bot.user.mood_dialog import MoodSG
 from app.dao.activity_dao import ActivityDAO
 from app.dao.database import get_db_session
 
@@ -26,12 +27,19 @@ async def cmd_start(message: Message, dialog_manager: DialogManager):
         await dialog_manager.start(state=GreetingSG.welcome)
 
 
+@router.message(Command("mood"))
+async def cmd_mood(_message: Message, dialog_manager: DialogManager):
+    """Open the mood tracking dialog."""
+    await dialog_manager.start(state=MoodSG.select_emotions)
+
+
 @router.message(Command("help"))
 async def cmd_help(message: Message):
     await message.answer(
         text="""
         Hello!
         /start for restart
+        /mood to track your mood
         /help for this message
         """,
     )

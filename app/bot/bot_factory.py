@@ -10,6 +10,7 @@ from loguru import logger
 
 from app.bot.middleware import UserTrackingMiddleware
 from app.bot.user.greeting_dialog import greeting_dialog
+from app.bot.user.mood_dialog import mood_dialog
 from app.bot.user.router import router as user_router
 from app.config import settings
 
@@ -24,28 +25,30 @@ dp.callback_query.middleware(UserTrackingMiddleware())
 
 async def set_commands():
     commands = [
-        BotCommand(command="start", description="start bot"),
-        BotCommand(command="help", description="help"),
+        BotCommand(command="start", description="Запустить бота"),
+        BotCommand(command="mood", description="Записать настроение"),
+        BotCommand(command="help", description="Помощь"),
     ]
-    logger.debug("SSetting commands")
+    logger.debug("Setting commands")
     await bot.set_my_commands(commands=commands, scope=BotCommandScopeDefault())
 
 
 async def start_bot():
     logger.info("Starting bot")
     await set_commands()
-    setup_dialogs(dp)
     dp.include_router(greeting_dialog)
+    dp.include_router(mood_dialog)
     dp.include_router(user_router)
+    setup_dialogs(dp)
 
     for admin_id in settings.ADMIN_IDS:
         with contextlib.suppress(Exception):
-            await bot.send_message(chat_id=admin_id, text=f"mood_trackerbot started")
+            await bot.send_message(chat_id=admin_id, text="mood_trackerbot started")
     logger.info("Bot started")
 
 
 async def stop_bot():
     for admin_id in settings.ADMIN_IDS:
         with contextlib.suppress(Exception):
-            await bot.send_message(chat_id=admin_id, text=f"mood_trackerbot stopped")
+            await bot.send_message(chat_id=admin_id, text="mood_trackerbot stopped")
     logger.info("Bot stopped")

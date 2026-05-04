@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime  # noqa: TC003
 
-from sqlalchemy import TIMESTAMP, BigInteger, ForeignKey, String, func
+from sqlalchemy import TIMESTAMP, BigInteger, Boolean, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.dao.database import Base
@@ -40,3 +40,11 @@ class UserActivity(Base):
     command: Mapped[str | None] = mapped_column(String(100), nullable=True)
     callback_data: Mapped[str | None] = mapped_column(String(255), nullable=True)
     text_preview: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+
+class Emotion(Base):
+    __tablename__ = "emotions"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String(100))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
