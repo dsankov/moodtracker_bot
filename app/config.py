@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     # Environment: "development" (ngrok) or "production" (nginx + domain)
     APP_ENV: str = "development"
+    BOT_LANGUAGE: str = "ru"
 
     BASE_URL: str = ""
     NGROK_AUTHTOKEN: str = ""

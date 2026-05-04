@@ -9,6 +9,7 @@ from aiogram_dialog.widgets.kbd import (
 )
 from aiogram_dialog.widgets.text import Const, Format
 
+from app.bot.i18n import t
 from app.dao.database import get_db_session
 from app.dao.emotion_dao import EmotionDAO
 
@@ -61,10 +62,15 @@ async def emotions_getter(
     selected_count = len(selected_names)
 
     if selected_count == 0:
-        header = "Выберите 3 эмоции, которые вы испытываете прямо сейчас"
+        header = t("mood.select_header")
     else:
         choices_text = ", ".join(selected_names)
-        header = f"Вы выбрали: {choices_text} ({selected_count} из {MAX_EMOTIONS})"
+        header = t(
+            "mood.selected_header",
+            choices=choices_text,
+            count=selected_count,
+            max=MAX_EMOTIONS,
+        )
 
     return {
         "emotions": emotions,
@@ -109,8 +115,11 @@ async def on_proceed_clicked(
 
     if len(ordered) != MAX_EMOTIONS:
         await callback.answer(
-            text=f"Выбрано {len(ordered)}/{MAX_EMOTIONS}. "
-            f"Нужно ровно {MAX_EMOTIONS} эмоции.",
+            text=t(
+                "mood.validation_alert",
+                current=len(ordered),
+                max=MAX_EMOTIONS,
+            ),
             show_alert=True,
         )
         return
@@ -127,7 +136,7 @@ async def on_save_clicked(
     """Close the dialog with a demo message (no DB save yet)."""
     if callback.message:
         await callback.message.answer(
-            text="Запись сохранена! (демо-режим)",
+            text=t("mood.saved_demo"),
         )
     await dialog_manager.done()
 
@@ -156,7 +165,7 @@ mood_dialog = Dialog(
         Format("{header}"),
         ScrollingGroup(
             Multiselect(
-                Format("✅ {item.name}"),
+                Format(t("mood.emotion_checked")),
                 Format("{item.name}"),
                 id="emotions_ms",
                 item_id_getter=lambda emotion: str(emotion.id),
@@ -169,12 +178,12 @@ mood_dialog = Dialog(
         ),
         Row(
             Button(
-                Const("Записать"),
+                Const(t("mood.btn_proceed")),
                 id="proceed_btn",
                 on_click=on_proceed_clicked,
             ),
             Button(
-                Const("Отмена"),
+                Const(t("btn.cancel")),
                 id="cancel_btn",
                 on_click=on_cancel_clicked,
             ),
@@ -184,15 +193,15 @@ mood_dialog = Dialog(
     ),
     # Window 2: confirm selection
     Window(
-        Format("Вы выбрали:\n\n{emotions_list}"),
+        Format(t("mood.confirm_header")),
         Row(
             Button(
-                Const("Записать ✅"),
+                Const(t("mood.btn_save")),
                 id="save_btn",
                 on_click=on_save_clicked,
             ),
             Button(
-                Const("Назад ↩️"),
+                Const(t("btn.back")),
                 id="back_btn",
                 on_click=on_back_clicked,
             ),

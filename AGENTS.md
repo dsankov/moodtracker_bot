@@ -15,6 +15,7 @@ This file provides guidance to agents when working with code in this repository.
 
 - FastAPI + Aiogram hybrid: Web server handles webhook endpoints, bot processes Telegram updates
 - Bot factory pattern: Centralized bot creation in `app/bot/bot_factory.py`
+- i18n module: All user-facing strings in `app/bot/i18n.py` with `t(key)` helper; language controlled by `BOT_LANGUAGE` setting
 - Memory storage for FSM: Uses aiogram's MemoryStorage (not persistent)
 - SQLite with aiosqlite: Async database operations required
 - Webhook mode: Bot operates via webhook (not polling)
@@ -35,6 +36,8 @@ This file provides guidance to agents when working with code in this repository.
 - Settings loaded from `.env` file relative to `app/config.py` location
 - Webhook URL: In production (`APP_ENV=production`), uses `BASE_URL` directly; in development, resolves via ngrok API
 - `APP_ENV` controls mode: `development` (ngrok) or `production` (nginx reverse-proxy)
+- `BOT_LANGUAGE` controls UI language: `"ru"` (default) or `"en"` — all strings in `app/bot/i18n.py`
+- All user-facing strings must use `t("key")` from `app/bot/i18n.py` — never hardcode text in dialog files
 - Admin notifications sent to all ADMIN_IDS on bot start/stop
 - Loguru logging configured in `app/config.py` with rotation
 

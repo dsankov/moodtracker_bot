@@ -4,6 +4,8 @@ from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import Button
 from aiogram_dialog.widgets.text import Const
 
+from app.bot.i18n import t
+
 
 class HelpSG(StatesGroup):
     main = State()
@@ -20,13 +22,8 @@ async def on_ok_clicked(
 
 help_dialog = Dialog(
     Window(
-        Const(
-            "Hello!\n"
-            "/start for restart\n"
-            "/mood to track your mood\n"
-            "/help for this message",
-        ),
-        Button(Const("OK"), id="ok_btn", on_click=on_ok_clicked),
+        Const(t("help.text")),
+        Button(Const(t("btn.ok")), id="ok_btn", on_click=on_ok_clicked),
         state=HelpSG.main,
     ),
 )

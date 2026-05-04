@@ -1,9 +1,10 @@
-from aiogram.types import CallbackQuery
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import CallbackQuery
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import Button
 from aiogram_dialog.widgets.text import Const, Format, Multi
 
+from app.bot.i18n import t
 from app.dao.activity_dao import ActivityDAO
 from app.dao.database import get_db_session
 
@@ -35,8 +36,8 @@ async def returning_getter(
             telegram_id=user.id,
         )
 
-        first_seen = "unknown"
-        last_help = "You haven't used /help yet."
+        first_seen = t("greeting.unknown_date")
+        last_help = t("greeting.no_help_yet")
 
         if db_user:
             first_seen = db_user.first_seen_at.strftime("%Y-%m-%d %H:%M")
@@ -68,24 +69,24 @@ greeting_dialog = Dialog(
     # Window for new users
     Window(
         Multi(
-            Format("Hello, {first_name}! 👋"),
-            Const("Welcome to Mood Tracker Bot!"),
-            Const("I can help you track your mood and provide insights."),
+            Format(t("greeting.hello")),
+            Const(t("greeting.welcome_new")),
+            Const(t("greeting.welcome_desc")),
             sep="\n",
         ),
-        Button(Const("OK"), id="ok_btn", on_click=on_ok_clicked),
+        Button(Const(t("btn.ok")), id="ok_btn", on_click=on_ok_clicked),
         state=GreetingSG.welcome,
         getter=welcome_getter,
     ),
     # Window for returning users
     Window(
         Multi(
-            Format("Hello, {first_name}! 👋"),
-            Format("We first met: {first_seen}"),
-            Format("Last time you used /help: {last_help}"),
+            Format(t("greeting.hello")),
+            Format(t("greeting.first_seen")),
+            Format(t("greeting.last_help")),
             sep="\n",
         ),
-        Button(Const("OK"), id="ok_btn", on_click=on_ok_clicked),
+        Button(Const(t("btn.ok")), id="ok_btn", on_click=on_ok_clicked),
         state=GreetingSG.returning,
         getter=returning_getter,
     ),

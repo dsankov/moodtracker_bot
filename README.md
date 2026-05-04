@@ -8,6 +8,7 @@ MoodTracker Bot is a simple and efficient bot designed to help you track your mo
 - View mood history
 - Generate mood reports
 - User-friendly interface
+- Multi-language support (Russian/English) via `BOT_LANGUAGE` setting
 
 ## Installation
 

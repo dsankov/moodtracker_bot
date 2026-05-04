@@ -65,6 +65,7 @@ BOT_TOKEN=<your-bot-token>
 ADMIN_IDS=[112033576]
 APP_ENV=production
 BASE_URL=https://skaters.top
+BOT_LANGUAGE=ru
 ```
 
 ### `.env` for local development
@@ -73,6 +74,7 @@ BASE_URL=https://skaters.top
 BOT_TOKEN=<your-bot-token>
 ADMIN_IDS=[112033576]
 APP_ENV=development
+BOT_LANGUAGE=ru
 BASE_URL=heroic-concise-halibut.ngrok-free.app
 NGROK_AUTHTOKEN=<your-ngrok-token>
 NGROK_URL=heroic-concise-halibut.ngrok-free.app
