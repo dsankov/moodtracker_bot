@@ -20,23 +20,57 @@ class MoodSG(StatesGroup):
     confirm = State()
 
 
+async def on_emotion_toggled(
+    _callback: CallbackQuery,
+    _widget,
+    dialog_manager: DialogManager,
+    item_id: str,
+) -> None:
+    """Track selection order in dialog_data."""
+    ordered: list[str] = dialog_manager.dialog_data.get(
+        "ordered_selection", [],
+    )
+    if item_id in ordered:
+        ordered.remove(item_id)
+    else:
+        ordered.append(item_id)
+    dialog_manager.dialog_data["ordered_selection"] = ordered
+
+
 async def emotions_getter(
     dialog_manager: DialogManager,
     **_kwargs,
 ) -> dict:
-    """Load active emotions and current selection count."""
+    """Load active emotions and current selection with names."""
     async with get_db_session() as session:
         emotions = await EmotionDAO.get_all_active(session=session)
 
-    selected_count = 0
+    ordered: list[str] = dialog_manager.dialog_data.get(
+        "ordered_selection", [],
+    )
+
+    # Prune stale IDs (e.g. if dialog was reset)
     widget = dialog_manager.find("emotions_ms")
     if widget:
-        selected_count = len(widget.get_checked())
+        checked = set(widget.get_checked())
+        ordered = [sid for sid in ordered if sid in checked]
+        dialog_manager.dialog_data["ordered_selection"] = ordered
+
+    id_to_name = {str(e.id): e.name for e in emotions}
+    selected_names = [id_to_name[sid] for sid in ordered if sid in id_to_name]
+    selected_count = len(selected_names)
+
+    if selected_count == 0:
+        header = "Выберите 3 эмоции, которые вы испытываете прямо сейчас"
+    else:
+        choices_text = ", ".join(selected_names)
+        header = f"Вы выбрали: {choices_text} ({selected_count} из {MAX_EMOTIONS})"
 
     return {
         "emotions": emotions,
         "selected_count": selected_count,
         "max": MAX_EMOTIONS,
+        "header": header,
     }
 
 
@@ -44,8 +78,8 @@ async def confirm_getter(
     dialog_manager: DialogManager,
     **_kwargs,
 ) -> dict:
-    """Show selected emotion names on the confirmation screen."""
-    selected_ids = dialog_manager.dialog_data.get(
+    """Show selected emotion names on the confirmation screen (in order)."""
+    selected_ids: list[str] = dialog_manager.dialog_data.get(
         "selected_emotion_ids", [],
     )
 
@@ -55,7 +89,11 @@ async def confirm_getter(
             emotion_ids=selected_ids,
         )
 
-    names = ", ".join(e.name for e in emotions)
+    # Preserve selection order
+    id_to_name = {str(e.id): e.name for e in emotions}
+    names = ", ".join(
+        id_to_name[sid] for sid in selected_ids if sid in id_to_name
+    )
     return {"emotions_list": names}
 
 
@@ -65,18 +103,19 @@ async def on_proceed_clicked(
     dialog_manager: DialogManager,
 ) -> None:
     """Validate selection and switch to confirm state."""
-    widget = dialog_manager.find("emotions_ms")
-    selected = widget.get_checked() if widget else set()
+    ordered: list[str] = dialog_manager.dialog_data.get(
+        "ordered_selection", [],
+    )
 
-    if len(selected) != MAX_EMOTIONS:
+    if len(ordered) != MAX_EMOTIONS:
         await callback.answer(
-            text=f"Выбрано {len(selected)}/{MAX_EMOTIONS}. "
+            text=f"Выбрано {len(ordered)}/{MAX_EMOTIONS}. "
             f"Нужно ровно {MAX_EMOTIONS} эмоции.",
             show_alert=True,
         )
         return
 
-    dialog_manager.dialog_data["selected_emotion_ids"] = list(selected)
+    dialog_manager.dialog_data["selected_emotion_ids"] = ordered
     await dialog_manager.switch_to(state=MoodSG.confirm)
 
 
@@ -114,10 +153,7 @@ async def on_back_clicked(
 mood_dialog = Dialog(
     # Window 1: select emotions
     Window(
-        Format(
-            "Выберите {max} эмоции "
-            "(выбрано: {selected_count}/{max}):",
-        ),
+        Format("{header}"),
         ScrollingGroup(
             Multiselect(
                 Format("✅ {item.name}"),
@@ -125,6 +161,7 @@ mood_dialog = Dialog(
                 id="emotions_ms",
                 item_id_getter=lambda emotion: str(emotion.id),
                 items="emotions",
+                on_click=on_emotion_toggled,
             ),
             id="emotions_scroll",
             width=1,

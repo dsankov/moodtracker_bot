@@ -1,9 +1,11 @@
 from aiogram.dispatcher.router import Router
 from aiogram.filters import Command, CommandStart
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram_dialog import DialogManager
 
 from app.bot.user.greeting_dialog import GreetingSG
+from app.bot.user.help_dialog import HelpSG
 from app.bot.user.mood_dialog import MoodSG
 from app.dao.activity_dao import ActivityDAO
 from app.dao.database import get_db_session
@@ -28,18 +30,27 @@ async def cmd_start(message: Message, dialog_manager: DialogManager):
 
 
 @router.message(Command("mood"))
-async def cmd_mood(_message: Message, dialog_manager: DialogManager):
-    """Open the mood tracking dialog."""
+async def cmd_mood(
+    _message: Message,
+    dialog_manager: DialogManager,
+    state: FSMContext,
+):
+    """Open or resume the mood tracking dialog."""
+    current = await state.get_state()
+
+    # If help dialog is on top, close it — mood dialog underneath resumes
+    if current == HelpSG.main.state:
+        await dialog_manager.done()
+        return
+
+    # If mood dialog is already active, don't restart
+    if current in (MoodSG.select_emotions.state, MoodSG.confirm.state):
+        return
+
     await dialog_manager.start(state=MoodSG.select_emotions)
 
 
 @router.message(Command("help"))
-async def cmd_help(message: Message):
-    await message.answer(
-        text="""
-        Hello!
-        /start for restart
-        /mood to track your mood
-        /help for this message
-        """,
-    )
+async def cmd_help(_message: Message, dialog_manager: DialogManager):
+    """Show help as an overlay dialog (any active dialog stays underneath)."""
+    await dialog_manager.start(state=HelpSG.main)
