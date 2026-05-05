@@ -34,6 +34,12 @@ def upgrade() -> None:
         sa.Column("last_name", sa.String(255), nullable=True),
         sa.Column("username", sa.String(255), nullable=True),
         sa.Column(
+            "language",
+            sa.String(5),
+            server_default="en",
+            nullable=False,
+        ),
+        sa.Column(
             "first_seen_at",
             sa.TIMESTAMP(),
             server_default=sa.func.now(),

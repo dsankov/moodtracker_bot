@@ -32,13 +32,6 @@ class EmotionDisplay:
     name: str
 
 
-def _translate_emotion_name(emotion: object, lang: str) -> str:
-    """Return the emotion name in the requested language."""
-    if lang == "en" and getattr(emotion, "name_en", None):
-        return emotion.name_en  # type: ignore[union-attr]
-    return emotion.name  # type: ignore[union-attr]
-
-
 class MoodSG(StatesGroup):
     select_emotions = State()
     confirm = State()
@@ -70,7 +63,7 @@ async def emotions_getter(
     lang = await get_user_lang(dialog_manager)
 
     async with get_db_session() as session:
-        emotions = await EmotionDAO.get_all_active(session=session)
+        emotions = await EmotionDAO.get_all(session=session)
 
     ordered: list[str] = dialog_manager.dialog_data.get(
         "ordered_selection",
@@ -84,11 +77,11 @@ async def emotions_getter(
         ordered = [sid for sid in ordered if sid in checked]
         dialog_manager.dialog_data["ordered_selection"] = ordered
 
-    # Wrap emotions with translated names
+    # Wrap emotions with translated names via i18n
     display_emotions = [
         EmotionDisplay(
             id=str(e.id),
-            name=_translate_emotion_name(e, lang),
+            name=t(f"emotion.{e.slug}", lang=lang),
         )
         for e in emotions
     ]
@@ -139,7 +132,7 @@ async def confirm_getter(
         )
 
     # Preserve selection order with translated names
-    id_to_name = {str(e.id): _translate_emotion_name(e, lang) for e in emotions}
+    id_to_name = {str(e.id): t(f"emotion.{e.slug}", lang=lang) for e in emotions}
     names = ", ".join(id_to_name[sid] for sid in selected_ids if sid in id_to_name)
     return {
         "emotions_list": names,

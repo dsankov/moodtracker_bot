@@ -12,11 +12,9 @@ if TYPE_CHECKING:
 
 class EmotionDAO:
     @staticmethod
-    async def get_all_active(session: AsyncSession) -> list[Emotion]:
-        """Get all active emotions ordered by name."""
-        query = (
-            select(Emotion).where(Emotion.is_active.is_(True)).order_by(Emotion.name)
-        )
+    async def get_all(session: AsyncSession) -> list[Emotion]:
+        """Get all emotions ordered by sort_order."""
+        query = select(Emotion).order_by(Emotion.sort_order)
         result = await session.execute(query)
         return list(result.scalars().all())
 

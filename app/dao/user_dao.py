@@ -43,6 +43,16 @@ class UserDAO:
         return result.scalar_one()
 
     @staticmethod
+    async def get_by_telegram_id(
+        session: AsyncSession,
+        telegram_id: int,
+    ) -> User | None:
+        """Look up a user by their Telegram ID."""
+        query = select(User).where(User.telegram_id == telegram_id)
+        result = await session.execute(query)
+        return result.scalar_one_or_none()
+
+    @staticmethod
     async def update_language(
         session: AsyncSession,
         telegram_id: int,

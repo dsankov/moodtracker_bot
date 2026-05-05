@@ -9,8 +9,8 @@ from app.bot.lang_utils import get_user_lang
 from app.bot.user.help_dialog import HelpSG
 from app.bot.user.language_dialog import LanguageSG
 from app.bot.user.mood_dialog import MoodSG
-from app.dao.activity_dao import ActivityDAO
 from app.dao.database import get_db_session
+from app.dao.user_dao import UserDAO
 
 router = Router()
 
@@ -37,7 +37,7 @@ async def cmd_start(message: Message, dialog_manager: DialogManager):
     lang = await get_user_lang(dialog_manager)
 
     async with get_db_session() as session:
-        db_user = await ActivityDAO.get_user_by_telegram_id(
+        db_user = await UserDAO.get_by_telegram_id(
             session=session,
             telegram_id=user.id,
         )

@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 from aiogram import BaseMiddleware
-from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
-from app.dao.activity_dao import ActivityDAO, ActivityInfo
 from app.dao.database import get_db_session
 from app.dao.user_dao import UserDAO
 
@@ -25,31 +23,9 @@ class UserTrackingMiddleware(BaseMiddleware):
                     username=user.username,
                 )
 
-                info = self._extract_activity_info(event)
-                await ActivityDAO.log_activity(
-                    session=session,
-                    user_id=str(db_user.id),
-                    info=info,
-                )
-
                 # Store user's language preference for per-user i18n
                 data["user_lang"] = db_user.language
             except Exception:
                 logger.error("Failed to track user {}", user.id)
 
         return await handler(event, data)
-
-    @staticmethod
-    def _extract_activity_info(event) -> ActivityInfo:
-        if isinstance(event, Message):
-            text = event.text or ""
-            if text.startswith("/"):
-                command = text.split()[0].lstrip("/").split("@")[0]
-                return ActivityInfo(activity_type="command", command=command)
-            return ActivityInfo(
-                activity_type="message",
-                text_preview=text[:255] if text else None,
-            )
-        if isinstance(event, CallbackQuery):
-            return ActivityInfo(activity_type="callback", callback_data=event.data)
-        return ActivityInfo(activity_type="unknown")

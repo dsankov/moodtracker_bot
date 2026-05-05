@@ -6,8 +6,8 @@ to ensure the latest committed value is always used.
 
 from aiogram_dialog import DialogManager
 
-from app.dao.activity_dao import ActivityDAO
 from app.dao.database import get_db_session
+from app.dao.user_dao import UserDAO
 
 
 async def get_user_lang(dialog_manager: DialogManager) -> str:
@@ -20,7 +20,7 @@ async def get_user_lang(dialog_manager: DialogManager) -> str:
     if not user:
         return "en"
     async with get_db_session() as session:
-        db_user = await ActivityDAO.get_user_by_telegram_id(
+        db_user = await UserDAO.get_by_telegram_id(
             session=session,
             telegram_id=user.id,
         )

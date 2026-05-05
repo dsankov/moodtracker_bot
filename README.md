@@ -4,11 +4,12 @@ MoodTracker Bot is a simple and efficient bot designed to help you track your mo
 
 ## Features
 
-- Log daily mood entries
-- View mood history
-- Generate mood reports
-- User-friendly interface
-- Multi-language support (Russian/English) via `BOT_LANGUAGE` setting
+- Log daily mood entries by selecting emotions from a curated list of 74 emotions
+- Emotions organized in 7 logical groups (Fear/Anxiety, Anger/Disgust, Positive/Empowered, Sadness/Shame, Stress/Fatigue, Surprise/Confusion, Gratitude/Contentment)
+- Multi-language support (English/Russian) with per-user language preference
+- Extensible i18n system — adding new languages requires only a new locale file, no database changes
+- Webhook-based Telegram bot with FastAPI backend
+- Docker deployment with development (ngrok) and production (nginx) modes
 
 ## Installation
 
