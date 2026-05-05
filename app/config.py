@@ -32,7 +32,7 @@ class Settings(BaseSettings):
         return self.APP_ENV == "production"
 
     # Function to get the ngrok URL (development only)
-    async def _get_ngrok_url(self) -> str:
+    async def _get_ngrok_url(self) -> str | None:
         """Get the ngrok URL for the current session."""
         try:
             async with httpx.AsyncClient() as client:

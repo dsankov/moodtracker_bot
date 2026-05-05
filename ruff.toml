@@ -14,5 +14,5 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"alembic/*" = ["INP001"]
-"alembic/versions/*" = ["INP001"]
+"alembic/*" = ["INP001", "E501"]
+"alembic/versions/*" = ["INP001", "E501"]

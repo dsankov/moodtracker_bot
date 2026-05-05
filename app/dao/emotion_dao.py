@@ -15,9 +15,7 @@ class EmotionDAO:
     async def get_all_active(session: AsyncSession) -> list[Emotion]:
         """Get all active emotions ordered by name."""
         query = (
-            select(Emotion)
-            .where(Emotion.is_active.is_(True))
-            .order_by(Emotion.name)
+            select(Emotion).where(Emotion.is_active.is_(True)).order_by(Emotion.name)
         )
         result = await session.execute(query)
         return list(result.scalars().all())

@@ -3,13 +3,11 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from aiogram.exceptions import AiogramError
-from fastapi import FastAPI, Header, Request
-
-# from icecream import ic
+from alembic.config import Config
+from fastapi import FastAPI, Request
 from loguru import logger
 
 from alembic import command
-from alembic.config import Config
 from app.bot import bot_factory
 from app.config import settings
 
@@ -55,7 +53,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
 
 
 @app.get("/health_check")

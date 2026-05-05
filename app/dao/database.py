@@ -1,9 +1,7 @@
-import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
-from decimal import Decimal
 
-from sqlalchemy import TIMESTAMP, func, inspect
+from sqlalchemy import TIMESTAMP, func
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
     AsyncSession,
@@ -27,24 +25,6 @@ class Base(AsyncAttrs, DeclarativeBase):
         server_default=func.now(),
         onupdate=func.now(),
     )
-
-    def to_dict(self, exclude_none: bool = False):
-        """Convert the model to a dictionary."""
-        data = {}
-        for column in inspect(self.__class__).columns:
-            value = getattr(self, column.key)
-            if exclude_none and value is None:
-                continue
-
-            if isinstance(value, datetime):
-                value = value.isoformat()
-            elif isinstance(value, Decimal):
-                value = float(value)
-            elif isinstance(value, uuid.UUID):
-                value = str(value)
-
-            data[column.key] = value
-        return data
 
 
 @asynccontextmanager

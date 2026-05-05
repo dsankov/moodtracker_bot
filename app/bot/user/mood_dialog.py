@@ -30,7 +30,6 @@ class EmotionDisplay:
 
     id: str
     name: str
-    is_active: bool
 
 
 def _translate_emotion_name(emotion: object, lang: str) -> str:
@@ -90,7 +89,6 @@ async def emotions_getter(
         EmotionDisplay(
             id=str(e.id),
             name=_translate_emotion_name(e, lang),
-            is_active=e.is_active,
         )
         for e in emotions
     ]

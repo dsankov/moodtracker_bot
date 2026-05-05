@@ -23,9 +23,6 @@ _ru = {
         "Я помогу вам отслеживать настроение и получать инсайты."
     ),
     "greeting.first_seen": "Мы впервые встретились: {first_seen}",
-    "greeting.last_help": "Последний раз вы использовали /help: {last_help}",
-    "greeting.unknown_date": "неизвестно",
-    "greeting.no_help_yet": "Вы ещё не использовали /help.",
     # --- help dialog ---
     "help.text": (
         "Привет!\n"
@@ -69,9 +66,6 @@ _en = {
     "greeting.welcome_new": "Welcome to Mood Tracker Bot!",
     "greeting.welcome_desc": "I can help you track your mood and provide insights.",
     "greeting.first_seen": "We first met: {first_seen}",
-    "greeting.last_help": "Last time you used /help: {last_help}",
-    "greeting.unknown_date": "unknown",
-    "greeting.no_help_yet": "You haven't used /help yet.",
     # --- help dialog ---
     "help.text": (
         "Hello!\n"

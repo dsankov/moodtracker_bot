@@ -17,14 +17,14 @@ This file provides guidance to agents when working with code in this repository.
 - Bot factory pattern: Centralized bot creation in `app/bot/bot_factory.py`
 - i18n module: Per-user language via `app/bot/i18n.py` `t(key, lang=...)` helper; language read from DB by `app/bot/lang_utils.py`; default `BOT_LANGUAGE` setting used as fallback
 - Memory storage for FSM: Uses aiogram's MemoryStorage (not persistent)
-- SQLite with aiosqlite: Async database operations required
+- PostgreSQL with asyncpg: Async database operations required
 - Webhook mode: Bot operates via webhook (not polling)
 - Dual environment: `APP_ENV=development` uses ngrok; `APP_ENV=production` uses nginx + domain
 - Production compose: `docker-compose.prod.yml` (no ngrok service)
 
 ## Code Style
 
-- Ruff configuration ignores: F541 (f-strings without placeholders), ERA001 (commented code), ANN (type annotations), D (docstrings)
+- Ruff configuration ignores: F541, ERA001, ANN, D, COM812, FBT001, FBT002, FAST002, BLE001, SLF001; E501 ignored for alembic migration files
 - Use `contextlib.suppress(Exception)` for error handling in bot operations
 - Pydantic models for configuration with BaseSettings
 - Async/await required throughout due to async database and bot operations
@@ -50,7 +50,7 @@ This file provides guidance to agents when working with code in this repository.
 
 ## Gotchas
 
-- Database engine has typo: `enging` instead of `engine` in `app/dao/database.py`
 - Bot requires webhook setup before processing updates
 - Empty `__init__.py` files throughout the project
-- Pydantic test file (`app/pydantic_test.py`) has syntax error (missing comma in Field definition)
+- `_get_ngrok_url()` returns `str | None` — callers must handle `None`
+- Middleware stores `user_lang` in handler data dict; `get_user_lang()` in `lang_utils.py` reads from DB (not middleware data)

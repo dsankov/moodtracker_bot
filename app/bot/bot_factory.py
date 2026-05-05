@@ -10,7 +10,6 @@ from loguru import logger
 
 from app.bot.i18n import t
 from app.bot.middleware import UserTrackingMiddleware
-from app.bot.user.greeting_dialog import greeting_dialog
 from app.bot.user.help_dialog import help_dialog
 from app.bot.user.language_dialog import language_dialog
 from app.bot.user.mood_dialog import mood_dialog
@@ -41,7 +40,6 @@ async def start_bot():
     logger.info("Starting bot")
     await set_commands()
     dp.include_router(user_router)
-    dp.include_router(greeting_dialog)
     dp.include_router(help_dialog)
     dp.include_router(language_dialog)
     dp.include_router(mood_dialog)
