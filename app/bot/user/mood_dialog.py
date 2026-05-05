@@ -7,7 +7,10 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import (
     Button,
+    CurrentPage,
     Multiselect,
+    NextPage,
+    PrevPage,
     Row,
     ScrollingGroup,
 )
@@ -220,8 +223,24 @@ mood_dialog = Dialog(
                 on_click=on_emotion_toggled,
             ),
             id="emotions_scroll",
-            width=1,
+            width=2,
             height=6,
+            hide_pager=True,
+        ),
+        Row(
+            PrevPage(
+                scroll="emotions_scroll",
+                id="prev_page",
+            ),
+            CurrentPage(
+                scroll="emotions_scroll",
+                id="current_page",
+                text=Format("{current_page1}/{pages}"),
+            ),
+            NextPage(
+                scroll="emotions_scroll",
+                id="next_page",
+            ),
         ),
         Row(
             Button(
