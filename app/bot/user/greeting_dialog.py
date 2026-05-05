@@ -2,9 +2,10 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import Button
-from aiogram_dialog.widgets.text import Const, Format, Multi
+from aiogram_dialog.widgets.text import Format
 
 from app.bot.i18n import t
+from app.bot.lang_utils import get_user_lang
 from app.dao.activity_dao import ActivityDAO
 from app.dao.database import get_db_session
 
@@ -19,8 +20,18 @@ async def welcome_getter(
     **_kwargs,
 ) -> dict:
     """Getter for the new-user welcome window."""
+    lang = await get_user_lang(dialog_manager)
     user = dialog_manager.event.from_user
-    return {"first_name": user.first_name}
+    return {
+        "greeting_hello": t(
+            "greeting.hello",
+            lang=lang,
+            first_name=user.first_name,
+        ),
+        "greeting_welcome_new": t("greeting.welcome_new", lang=lang),
+        "greeting_welcome_desc": t("greeting.welcome_desc", lang=lang),
+        "btn_ok": t("btn.ok", lang=lang),
+    }
 
 
 async def returning_getter(
@@ -28,6 +39,7 @@ async def returning_getter(
     **_kwargs,
 ) -> dict:
     """Getter for the returning-user window — fetches DB info."""
+    lang = await get_user_lang(dialog_manager)
     user = dialog_manager.event.from_user
 
     async with get_db_session() as session:
@@ -36,8 +48,8 @@ async def returning_getter(
             telegram_id=user.id,
         )
 
-        first_seen = t("greeting.unknown_date")
-        last_help = t("greeting.no_help_yet")
+        first_seen = t("greeting.unknown_date", lang=lang)
+        last_help = t("greeting.no_help_yet", lang=lang)
 
         if db_user:
             first_seen = db_user.first_seen_at.strftime("%Y-%m-%d %H:%M")
@@ -50,43 +62,50 @@ async def returning_getter(
                 last_help = last_help_activity.strftime("%Y-%m-%d %H:%M")
 
     return {
-        "first_name": user.first_name,
-        "first_seen": first_seen,
-        "last_help": last_help,
+        "greeting_hello": t(
+            "greeting.hello",
+            lang=lang,
+            first_name=user.first_name,
+        ),
+        "greeting_first_seen": t(
+            "greeting.first_seen",
+            lang=lang,
+            first_seen=first_seen,
+        ),
+        "greeting_last_help": t(
+            "greeting.last_help",
+            lang=lang,
+            last_help=last_help,
+        ),
+        "btn_ok": t("btn.ok", lang=lang),
     }
 
 
 async def on_ok_clicked(
-    callback: CallbackQuery,
-    button: Button,
-    dialog_manager: DialogManager,
+    _callback: CallbackQuery,
+    _button: Button,
+    _dialog_manager: DialogManager,
 ) -> None:
     """Close the dialog when the OK button is pressed."""
-    await dialog_manager.done()
+    await _dialog_manager.done()
 
 
 greeting_dialog = Dialog(
     # Window for new users
     Window(
-        Multi(
-            Format(t("greeting.hello")),
-            Const(t("greeting.welcome_new")),
-            Const(t("greeting.welcome_desc")),
-            sep="\n",
-        ),
-        Button(Const(t("btn.ok")), id="ok_btn", on_click=on_ok_clicked),
+        Format("{greeting_hello}"),
+        Format("{greeting_welcome_new}"),
+        Format("{greeting_welcome_desc}"),
+        Button(Format("{btn_ok}"), id="ok_btn", on_click=on_ok_clicked),
         state=GreetingSG.welcome,
         getter=welcome_getter,
     ),
     # Window for returning users
     Window(
-        Multi(
-            Format(t("greeting.hello")),
-            Format(t("greeting.first_seen")),
-            Format(t("greeting.last_help")),
-            sep="\n",
-        ),
-        Button(Const(t("btn.ok")), id="ok_btn", on_click=on_ok_clicked),
+        Format("{greeting_hello}"),
+        Format("{greeting_first_seen}"),
+        Format("{greeting_last_help}"),
+        Button(Format("{btn_ok}"), id="ok_btn", on_click=on_ok_clicked),
         state=GreetingSG.returning,
         getter=returning_getter,
     ),

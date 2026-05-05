@@ -12,6 +12,7 @@ from app.bot.i18n import t
 from app.bot.middleware import UserTrackingMiddleware
 from app.bot.user.greeting_dialog import greeting_dialog
 from app.bot.user.help_dialog import help_dialog
+from app.bot.user.language_dialog import language_dialog
 from app.bot.user.mood_dialog import mood_dialog
 from app.bot.user.router import router as user_router
 from app.config import settings
@@ -30,6 +31,7 @@ async def set_commands():
         BotCommand(command="start", description=t("cmd.start")),
         BotCommand(command="mood", description=t("cmd.mood")),
         BotCommand(command="help", description=t("cmd.help")),
+        BotCommand(command="language", description=t("cmd.language")),
     ]
     logger.debug("Setting commands")
     await bot.set_my_commands(commands=commands, scope=BotCommandScopeDefault())
@@ -41,6 +43,7 @@ async def start_bot():
     dp.include_router(user_router)
     dp.include_router(greeting_dialog)
     dp.include_router(help_dialog)
+    dp.include_router(language_dialog)
     dp.include_router(mood_dialog)
     setup_dialogs(dp)
 

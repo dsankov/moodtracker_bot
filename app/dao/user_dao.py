@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from app.dao.models import User
@@ -41,3 +41,18 @@ class UserDAO:
         query = select(User).where(User.telegram_id == telegram_id)
         result = await session.execute(query)
         return result.scalar_one()
+
+    @staticmethod
+    async def update_language(
+        session: AsyncSession,
+        telegram_id: int,
+        language: str,
+    ) -> None:
+        """Update the user's language preference."""
+        stmt = (
+            update(User)
+            .where(User.telegram_id == telegram_id)
+            .values(language=language)
+        )
+        await session.execute(stmt)
+        await session.commit()

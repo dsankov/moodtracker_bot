@@ -15,7 +15,7 @@ This file provides guidance to agents when working with code in this repository.
 
 - FastAPI + Aiogram hybrid: Web server handles webhook endpoints, bot processes Telegram updates
 - Bot factory pattern: Centralized bot creation in `app/bot/bot_factory.py`
-- i18n module: All user-facing strings in `app/bot/i18n.py` with `t(key)` helper; language controlled by `BOT_LANGUAGE` setting
+- i18n module: Per-user language via `app/bot/i18n.py` `t(key, lang=...)` helper; language read from DB by `app/bot/lang_utils.py`; default `BOT_LANGUAGE` setting used as fallback
 - Memory storage for FSM: Uses aiogram's MemoryStorage (not persistent)
 - SQLite with aiosqlite: Async database operations required
 - Webhook mode: Bot operates via webhook (not polling)
@@ -36,14 +36,17 @@ This file provides guidance to agents when working with code in this repository.
 - Settings loaded from `.env` file relative to `app/config.py` location
 - Webhook URL: In production (`APP_ENV=production`), uses `BASE_URL` directly; in development, resolves via ngrok API
 - `APP_ENV` controls mode: `development` (ngrok) or `production` (nginx reverse-proxy)
-- `BOT_LANGUAGE` controls UI language: `"ru"` (default) or `"en"` — all strings in `app/bot/i18n.py`
-- All user-facing strings must use `t("key")` from `app/bot/i18n.py` — never hardcode text in dialog files
+- `BOT_LANGUAGE` controls default UI language: `"en"` (default) or `"ru"` — per-user language stored in `users.language` column
+- All user-facing strings must use `t("key", lang=lang)` from `app/bot/i18n.py` with `lang` from `get_user_lang(dialog_manager)` — never hardcode text in dialog files
+- Language resolution: `app/bot/lang_utils.py` reads user's language directly from DB on every getter call
+- Dialog widgets must use `Format("{key}")` with getter-provided translations, NOT `Const(t("key"))` (which is static)
 - Admin notifications sent to all ADMIN_IDS on bot start/stop
 - Loguru logging configured in `app/config.py` with rotation
 
 ## Workflow
 
 - Always present a plan with specific files, key changes, and reasoning BEFORE implementing — wait for user approval before making any changes
+- Always update `.md` docs (AGENTS.md, README.md, etc.) before commit
 
 ## Gotchas
 

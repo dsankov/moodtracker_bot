@@ -1,5 +1,9 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import (
     Button,
@@ -7,13 +11,33 @@ from aiogram_dialog.widgets.kbd import (
     Row,
     ScrollingGroup,
 )
-from aiogram_dialog.widgets.text import Const, Format
+from aiogram_dialog.widgets.text import Format
 
 from app.bot.i18n import t
+from app.bot.lang_utils import get_user_lang
 from app.dao.database import get_db_session
 from app.dao.emotion_dao import EmotionDAO
 
+if TYPE_CHECKING:
+    from aiogram.types import CallbackQuery
+
 MAX_EMOTIONS = 3
+
+
+@dataclass
+class EmotionDisplay:
+    """Wrapper that exposes the emotion name in the user's language."""
+
+    id: str
+    name: str
+    is_active: bool
+
+
+def _translate_emotion_name(emotion: object, lang: str) -> str:
+    """Return the emotion name in the requested language."""
+    if lang == "en" and getattr(emotion, "name_en", None):
+        return emotion.name_en  # type: ignore[union-attr]
+    return emotion.name  # type: ignore[union-attr]
 
 
 class MoodSG(StatesGroup):
@@ -29,7 +53,8 @@ async def on_emotion_toggled(
 ) -> None:
     """Track selection order in dialog_data."""
     ordered: list[str] = dialog_manager.dialog_data.get(
-        "ordered_selection", [],
+        "ordered_selection",
+        [],
     )
     if item_id in ordered:
         ordered.remove(item_id)
@@ -43,11 +68,14 @@ async def emotions_getter(
     **_kwargs,
 ) -> dict:
     """Load active emotions and current selection with names."""
+    lang = await get_user_lang(dialog_manager)
+
     async with get_db_session() as session:
         emotions = await EmotionDAO.get_all_active(session=session)
 
     ordered: list[str] = dialog_manager.dialog_data.get(
-        "ordered_selection", [],
+        "ordered_selection",
+        [],
     )
 
     # Prune stale IDs (e.g. if dialog was reset)
@@ -57,26 +85,41 @@ async def emotions_getter(
         ordered = [sid for sid in ordered if sid in checked]
         dialog_manager.dialog_data["ordered_selection"] = ordered
 
-    id_to_name = {str(e.id): e.name for e in emotions}
+    # Wrap emotions with translated names
+    display_emotions = [
+        EmotionDisplay(
+            id=str(e.id),
+            name=_translate_emotion_name(e, lang),
+            is_active=e.is_active,
+        )
+        for e in emotions
+    ]
+
+    id_to_name = {
+        str(e.id): de.name for e, de in zip(emotions, display_emotions, strict=True)
+    }
     selected_names = [id_to_name[sid] for sid in ordered if sid in id_to_name]
     selected_count = len(selected_names)
 
     if selected_count == 0:
-        header = t("mood.select_header")
+        header = t("mood.select_header", lang=lang)
     else:
         choices_text = ", ".join(selected_names)
         header = t(
             "mood.selected_header",
+            lang=lang,
             choices=choices_text,
             count=selected_count,
             max=MAX_EMOTIONS,
         )
 
     return {
-        "emotions": emotions,
+        "emotions": display_emotions,
         "selected_count": selected_count,
         "max": MAX_EMOTIONS,
         "header": header,
+        "btn_proceed": t("mood.btn_proceed", lang=lang),
+        "btn_cancel": t("btn.cancel", lang=lang),
     }
 
 
@@ -85,8 +128,10 @@ async def confirm_getter(
     **_kwargs,
 ) -> dict:
     """Show selected emotion names on the confirmation screen (in order)."""
+    lang = await get_user_lang(dialog_manager)
     selected_ids: list[str] = dialog_manager.dialog_data.get(
-        "selected_emotion_ids", [],
+        "selected_emotion_ids",
+        [],
     )
 
     async with get_db_session() as session:
@@ -95,12 +140,19 @@ async def confirm_getter(
             emotion_ids=selected_ids,
         )
 
-    # Preserve selection order
-    id_to_name = {str(e.id): e.name for e in emotions}
-    names = ", ".join(
-        id_to_name[sid] for sid in selected_ids if sid in id_to_name
-    )
-    return {"emotions_list": names}
+    # Preserve selection order with translated names
+    id_to_name = {str(e.id): _translate_emotion_name(e, lang) for e in emotions}
+    names = ", ".join(id_to_name[sid] for sid in selected_ids if sid in id_to_name)
+    return {
+        "emotions_list": names,
+        "confirm_header": t(
+            "mood.confirm_header",
+            lang=lang,
+            emotions_list=names,
+        ),
+        "btn_save": t("mood.btn_save", lang=lang),
+        "btn_back": t("btn.back", lang=lang),
+    }
 
 
 async def on_proceed_clicked(
@@ -109,14 +161,17 @@ async def on_proceed_clicked(
     dialog_manager: DialogManager,
 ) -> None:
     """Validate selection and switch to confirm state."""
+    lang = await get_user_lang(dialog_manager)
     ordered: list[str] = dialog_manager.dialog_data.get(
-        "ordered_selection", [],
+        "ordered_selection",
+        [],
     )
 
     if len(ordered) != MAX_EMOTIONS:
         await callback.answer(
             text=t(
                 "mood.validation_alert",
+                lang=lang,
                 current=len(ordered),
                 max=MAX_EMOTIONS,
             ),
@@ -134,9 +189,10 @@ async def on_save_clicked(
     dialog_manager: DialogManager,
 ) -> None:
     """Close the dialog with a demo message (no DB save yet)."""
+    lang = await get_user_lang(dialog_manager)
     if callback.message:
         await callback.message.answer(
-            text=t("mood.saved_demo"),
+            text=t("mood.saved_demo", lang=lang),
         )
     await dialog_manager.done()
 
@@ -165,7 +221,7 @@ mood_dialog = Dialog(
         Format("{header}"),
         ScrollingGroup(
             Multiselect(
-                Format(t("mood.emotion_checked")),
+                Format("✅ {item.name}"),
                 Format("{item.name}"),
                 id="emotions_ms",
                 item_id_getter=lambda emotion: str(emotion.id),
@@ -178,12 +234,12 @@ mood_dialog = Dialog(
         ),
         Row(
             Button(
-                Const(t("mood.btn_proceed")),
+                Format("{btn_proceed}"),
                 id="proceed_btn",
                 on_click=on_proceed_clicked,
             ),
             Button(
-                Const(t("btn.cancel")),
+                Format("{btn_cancel}"),
                 id="cancel_btn",
                 on_click=on_cancel_clicked,
             ),
@@ -193,15 +249,15 @@ mood_dialog = Dialog(
     ),
     # Window 2: confirm selection
     Window(
-        Format(t("mood.confirm_header")),
+        Format("{confirm_header}"),
         Row(
             Button(
-                Const(t("mood.btn_save")),
+                Format("{btn_save}"),
                 id="save_btn",
                 on_click=on_save_clicked,
             ),
             Button(
-                Const(t("btn.back")),
+                Format("{btn_back}"),
                 id="back_btn",
                 on_click=on_back_clicked,
             ),

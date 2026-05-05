@@ -31,6 +31,9 @@ class UserTrackingMiddleware(BaseMiddleware):
                     user_id=str(db_user.id),
                     info=info,
                 )
+
+                # Store user's language preference for per-user i18n
+                data["user_lang"] = db_user.language
             except Exception:
                 logger.error("Failed to track user {}", user.id)
 
