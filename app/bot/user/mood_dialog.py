@@ -215,7 +215,7 @@ mood_dialog = Dialog(
         Format("{header}"),
         ScrollingGroup(
             Multiselect(
-                Format("✅ {item.name}"),
+                Format("✔ {item.name}"),
                 Format("{item.name}"),
                 id="emotions_ms",
                 item_id_getter=lambda emotion: str(emotion.id),
@@ -224,7 +224,7 @@ mood_dialog = Dialog(
             ),
             id="emotions_scroll",
             width=2,
-            height=6,
+            height=8,
             hide_pager=True,
         ),
         Row(

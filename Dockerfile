@@ -1,13 +1,16 @@
 FROM python:3.12-slim
 
+# Install uv from the official image
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
 # Set working directory
 WORKDIR /app
 
 # Copy dependency files
-COPY requirements.txt ./
+COPY pyproject.toml uv.lock ./
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies (frozen lockfile, no dev groups, don't install project itself)
+RUN uv sync --frozen --no-dev --no-install-project
 
 # Copy application code
 COPY app/ ./app/
@@ -18,4 +21,4 @@ COPY alembic.ini ./
 EXPOSE 8000
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

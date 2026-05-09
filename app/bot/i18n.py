@@ -6,7 +6,7 @@ LANG = settings.BOT_LANGUAGE
 
 _messages: dict[str, dict[str, str]] = {"en": _en, "ru": _ru}
 
-LANG_NAMES = {"ru": "🇷🇺 Русский", "en": "🇬🇧 English"}
+LANG_NAMES = {"ru": "Русский", "en": "English"}
 
 
 def t(key: str, lang: str | None = None, **kwargs) -> str:

@@ -4,20 +4,20 @@ _en = {
     # --- shared buttons ---
     "btn.ok": "OK",
     "btn.cancel": "Cancel",
-    "btn.back": "Back ↩️",
+    "btn.back": "Back",
     # --- mood dialog ---
-    "mood.select_header": "Choose 3 emotions you are feeling right now",
-    "mood.selected_header": "You selected: {choices} ({count} of {max})",
+    "mood.select_header": "I am now:",
+    "mood.selected_header": "I am now: {choices} ({count} of {max})",
     "mood.validation_alert": (
         "Selected {current}/{max}. Exactly {max} emotions required."
     ),
     "mood.saved_demo": "Entry saved! (demo mode)",
-    "mood.emotion_checked": "✅ {item.name}",
+    "mood.emotion_checked": "✔ {item.name}",
     "mood.btn_proceed": "Record",
-    "mood.btn_save": "Record ✅",
+    "mood.btn_save": "Record",
     "mood.confirm_header": "You selected:\n\n{emotions_list}",
     # --- greeting dialog ---
-    "greeting.hello": "Hello, {first_name}! 👋",
+    "greeting.hello": "Hello, {first_name}!",
     "greeting.welcome_new": "Welcome to Mood Tracker Bot!",
     "greeting.welcome_desc": "I can help you track your mood and provide insights.",
     "greeting.first_seen": "We first met: {first_seen}",
@@ -37,7 +37,7 @@ _en = {
     # --- language dialog ---
     "language.select": "Choose language / Выберите язык:",
     "language.current": "Current language: {lang_name}",
-    "language.changed": "✅ Language changed to English!",
+    "language.changed": "Language changed to English!",
     # --- admin notifications ---
     "admin.bot_started": "mood_trackerbot started",
     "admin.bot_stopped": "mood_trackerbot stopped",

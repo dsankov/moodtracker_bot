@@ -43,8 +43,7 @@ async def on_russian_selected(
             telegram_id=user.id,
             language="ru",
         )
-    if callback.message:
-        await callback.message.answer(text=t("language.changed", lang="ru"))
+    await callback.answer(text=t("language.changed", lang="ru"))
     await dialog_manager.done()
 
 
@@ -61,8 +60,7 @@ async def on_english_selected(
             telegram_id=user.id,
             language="en",
         )
-    if callback.message:
-        await callback.message.answer(text=t("language.changed", lang="en"))
+    await callback.answer(text=t("language.changed", lang="en"))
     await dialog_manager.done()
 
 
@@ -71,12 +69,12 @@ language_dialog = Dialog(
         Format("{language_select}"),
         Format("{language_current}"),
         Button(
-            Const("🇷🇺 Русский"),
+            Const("Русский"),
             id="lang_ru_btn",
             on_click=on_russian_selected,
         ),
         Button(
-            Const("🇬🇧 English"),
+            Const("English"),
             id="lang_en_btn",
             on_click=on_english_selected,
         ),

@@ -11,6 +11,11 @@ MoodTracker Bot is a simple and efficient bot designed to help you track your mo
 - Webhook-based Telegram bot with FastAPI backend
 - Docker deployment with development (ngrok) and production (nginx) modes
 
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+- [uv](https://docs.astral.sh/uv/) (for local development only)
+
 ## Installation
 
 1. Clone the repository:
@@ -21,18 +26,43 @@ MoodTracker Bot is a simple and efficient bot designed to help you track your mo
     ```bash
     cd moodtracker_bot
     ```
-3. Install the required dependencies:
+3. Copy the environment template and fill in your values:
     ```bash
-    uv pip install -r requirements.txt
+    cp .env.example .env
     ```
 
 ## Usage
 
-1. Run the bot:
-    ```bash
-    python -m app.main 
-    ```
-2. Follow the on-screen instructions to log your mood.
+### Development (with ngrok)
+
+Start all services (app + PostgreSQL + ngrok):
+```bash
+make up-all
+```
+
+View logs:
+```bash
+make logs
+```
+
+Stop all services:
+```bash
+make down-all
+```
+
+### Production (with nginx on host)
+
+```bash
+make prod-up
+```
+
+### Local development (without Docker)
+
+Install dependencies and run directly:
+```bash
+uv sync
+uv run python -m app.main
+```
 
 ## Contributing
 

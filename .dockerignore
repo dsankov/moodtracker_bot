@@ -29,10 +29,11 @@ Makefile
 justfile
 ruff.toml
 .python-version
-uv.lock
-pyproject.toml
-requirements.in
 ngrok.yml
+
+# Old dependency files (no longer used)
+requirements.in
+requirements.txt
 
 # Data
 data/
