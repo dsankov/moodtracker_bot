@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import Message
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import (
     Button,
@@ -199,12 +201,15 @@ async def on_save_clicked(
 
 
 async def on_cancel_clicked(
-    _callback: CallbackQuery,
+    callback: CallbackQuery,
     _button: Button,
     dialog_manager: DialogManager,
 ) -> None:
-    """Cancel and close the dialog."""
+    """Cancel and close the dialog, removing its message."""
     await dialog_manager.done()
+    if isinstance(callback.message, Message):
+        with contextlib.suppress(Exception):
+            await callback.message.delete()
 
 
 async def on_back_clicked(

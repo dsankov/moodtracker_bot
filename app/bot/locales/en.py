@@ -24,7 +24,6 @@ _en = {
         "Hello!\n"
         "/start for restart\n"
         "/mood to track your mood\n"
-        "/help for this message\n"
         "/language to change language"
     ),
     # --- bot commands ---

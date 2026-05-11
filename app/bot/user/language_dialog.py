@@ -1,5 +1,8 @@
+import asyncio
+import contextlib
+
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import Dialog, DialogManager, Window
 from aiogram_dialog.widgets.kbd import Button
 from aiogram_dialog.widgets.text import Const, Format
@@ -30,21 +33,48 @@ async def language_getter(
     }
 
 
+async def _delete_later(message: Message, delay: float = 3.0) -> None:
+    """Delete a bot message after *delay* seconds."""
+    await asyncio.sleep(delay)
+    with contextlib.suppress(Exception):
+        await message.delete()
+
+
+async def _apply_language(
+    callback: CallbackQuery,
+    dialog_manager: DialogManager,
+    language: str,
+) -> None:
+    """Persist language choice, close dialog, show auto-deleting confirmation."""
+    user = callback.from_user
+    async with get_db_session() as session:
+        await UserDAO.update_language(
+            session=session,
+            telegram_id=user.id,
+            language=language,
+        )
+    await dialog_manager.done()
+
+    # Send confirmation in the new language, then clean up old dialog message
+    if callback.message:
+        msg = await callback.message.answer(
+            text=t("language.changed", lang=language),
+        )
+        asyncio.create_task(_delete_later(msg))  # noqa: RUF006
+
+        # Remove the old dialog message (shows pre-change status)
+        if isinstance(callback.message, Message):
+            with contextlib.suppress(Exception):
+                await callback.message.delete()
+
+
 async def on_russian_selected(
     callback: CallbackQuery,
     _button: Button,
     dialog_manager: DialogManager,
 ) -> None:
     """Set language to Russian."""
-    user = callback.from_user
-    async with get_db_session() as session:
-        await UserDAO.update_language(
-            session=session,
-            telegram_id=user.id,
-            language="ru",
-        )
-    await callback.answer(text=t("language.changed", lang="ru"))
-    await dialog_manager.done()
+    await _apply_language(callback, dialog_manager, language="ru")
 
 
 async def on_english_selected(
@@ -53,15 +83,7 @@ async def on_english_selected(
     dialog_manager: DialogManager,
 ) -> None:
     """Set language to English."""
-    user = callback.from_user
-    async with get_db_session() as session:
-        await UserDAO.update_language(
-            session=session,
-            telegram_id=user.id,
-            language="en",
-        )
-    await callback.answer(text=t("language.changed", lang="en"))
-    await dialog_manager.done()
+    await _apply_language(callback, dialog_manager, language="en")
 
 
 language_dialog = Dialog(
