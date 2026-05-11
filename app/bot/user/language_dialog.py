@@ -47,6 +47,7 @@ async def _apply_language(
 ) -> None:
     """Persist language choice, close dialog, show auto-deleting confirmation."""
     user = callback.from_user
+    start_data = dialog_manager.start_data
     async with get_db_session() as session:
         await UserDAO.update_language(
             session=session,
@@ -56,7 +57,6 @@ async def _apply_language(
     await dialog_manager.done()
 
     # Delete the user's original /language command message
-    start_data = dialog_manager.start_data
     cmd_msg_id: int | None = (
         start_data.get("cmd_msg_id") if isinstance(start_data, dict) else None
     )
@@ -67,14 +67,14 @@ async def _apply_language(
                 message_id=cmd_msg_id,
             )
 
-    # Send confirmation in the new language, then clean up old dialog message
+    # Send auto-deleting confirmation in the new language
     if callback.message:
         msg = await callback.message.answer(
             text=t("language.changed", lang=language),
         )
         asyncio.create_task(_delete_later(msg))  # noqa: RUF006
 
-        # Remove the old dialog message (shows pre-change status)
+        # Remove the old dialog message (shows pre-change language status)
         if isinstance(callback.message, Message):
             with contextlib.suppress(Exception):
                 await callback.message.delete()
