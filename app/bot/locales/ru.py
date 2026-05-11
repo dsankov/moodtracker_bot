@@ -7,7 +7,7 @@ _ru = {
     "btn.back": "Назад",
     # --- mood dialog ---
     "mood.select_header": "Я сейчас:",
-    "mood.selected_header": "Я сейчас: {choices} ({count} из {max})",
+    "mood.selected_header": "Я сейчас: {choices} [{count}/{max}]",
     "mood.validation_alert": (
         "Выбрано {current}/{max}. Нужно ровно {max} эмоции."
     ),

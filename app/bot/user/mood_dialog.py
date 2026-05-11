@@ -25,6 +25,12 @@ if TYPE_CHECKING:
     from aiogram.types import CallbackQuery
 
 MAX_EMOTIONS = 3
+SEPARATOR_LINE = "━━" * 15  # fixed-width line to keep dialog bubble constant
+
+# Check mark shown next to selected emotions.
+# Alternatives: "✔" (\u2714), "☑" (\u2611), "🗸" (\u2713),
+#               "✓" (\u2713), "⬜" (\u2B1C), "🔘" (\u1F518), "✅"
+CHECK_MARK = "☑"
 
 
 @dataclass
@@ -111,7 +117,7 @@ async def emotions_getter(
         "emotions": display_emotions,
         "selected_count": selected_count,
         "max": MAX_EMOTIONS,
-        "header": header,
+        "header": f"{header}\n{SEPARATOR_LINE}",
         "btn_proceed": t("mood.btn_proceed", lang=lang),
         "btn_cancel": t("btn.cancel", lang=lang),
     }
@@ -137,13 +143,14 @@ async def confirm_getter(
     # Preserve selection order with translated names
     id_to_name = {str(e.id): t(f"emotion.{e.slug}", lang=lang) for e in emotions}
     names = ", ".join(id_to_name[sid] for sid in selected_ids if sid in id_to_name)
+    confirm_text = t(
+        "mood.confirm_header",
+        lang=lang,
+        emotions_list=names,
+    )
     return {
         "emotions_list": names,
-        "confirm_header": t(
-            "mood.confirm_header",
-            lang=lang,
-            emotions_list=names,
-        ),
+        "confirm_header": f"{confirm_text}\n{SEPARATOR_LINE}",
         "btn_save": t("mood.btn_save", lang=lang),
         "btn_back": t("btn.back", lang=lang),
     }
@@ -215,8 +222,8 @@ mood_dialog = Dialog(
         Format("{header}"),
         ScrollingGroup(
             Multiselect(
-                Format("✔ {item.name}"),
-                Format("{item.name}"),
+                Format(f"{CHECK_MARK} {{item.name}}"),
+                Format("\u3164 {item.name}"),
                 id="emotions_ms",
                 item_id_getter=lambda emotion: str(emotion.id),
                 items="emotions",
