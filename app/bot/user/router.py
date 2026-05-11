@@ -56,7 +56,7 @@ async def cmd_start(message: Message, dialog_manager: DialogManager):
 
 @router.message(Command("mood"))
 async def cmd_mood(
-    _message: Message,
+    message: Message,
     dialog_manager: DialogManager,
     state: FSMContext,
 ):
@@ -70,7 +70,10 @@ async def cmd_mood(
     if current in (MoodSG.select_emotions.state, MoodSG.confirm.state):
         return
 
-    await dialog_manager.start(state=MoodSG.select_emotions)
+    await dialog_manager.start(
+        state=MoodSG.select_emotions,
+        data={"cmd_msg_id": message.message_id},
+    )
 
 
 @router.message(Command("help"))
@@ -81,7 +84,7 @@ async def cmd_help(_message: Message, dialog_manager: DialogManager):
 
 @router.message(Command("language"))
 async def cmd_language(
-    _message: Message,
+    message: Message,
     dialog_manager: DialogManager,
     state: FSMContext,
 ):
@@ -89,4 +92,7 @@ async def cmd_language(
     # Close help if active — don't return to it
     await _close_help_if_active(dialog_manager, state)
 
-    await dialog_manager.start(state=LanguageSG.select)
+    await dialog_manager.start(
+        state=LanguageSG.select,
+        data={"cmd_msg_id": message.message_id},
+    )

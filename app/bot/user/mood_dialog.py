@@ -186,6 +186,23 @@ async def on_proceed_clicked(
     await dialog_manager.switch_to(state=MoodSG.confirm)
 
 
+async def _delete_cmd_message(
+    callback: CallbackQuery,
+    dialog_manager: DialogManager,
+) -> None:
+    """Delete the user's original /mood command message."""
+    start_data = dialog_manager.start_data
+    cmd_msg_id: int | None = (
+        start_data.get("cmd_msg_id") if isinstance(start_data, dict) else None
+    )
+    if cmd_msg_id and callback.message:
+        with contextlib.suppress(Exception):
+            await callback.bot.delete_message(
+                chat_id=callback.message.chat.id,
+                message_id=cmd_msg_id,
+            )
+
+
 async def on_save_clicked(
     callback: CallbackQuery,
     _button: Button,
@@ -198,6 +215,10 @@ async def on_save_clicked(
             text=t("mood.saved_demo", lang=lang),
         )
     await dialog_manager.done()
+    await _delete_cmd_message(callback, dialog_manager)
+    if isinstance(callback.message, Message):
+        with contextlib.suppress(Exception):
+            await callback.message.delete()
 
 
 async def on_cancel_clicked(
@@ -207,6 +228,7 @@ async def on_cancel_clicked(
 ) -> None:
     """Cancel and close the dialog, removing its message."""
     await dialog_manager.done()
+    await _delete_cmd_message(callback, dialog_manager)
     if isinstance(callback.message, Message):
         with contextlib.suppress(Exception):
             await callback.message.delete()

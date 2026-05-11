@@ -33,7 +33,7 @@ async def language_getter(
     }
 
 
-async def _delete_later(message: Message, delay: float = 3.0) -> None:
+async def _delete_later(message: Message, delay: float = 5.0) -> None:
     """Delete a bot message after *delay* seconds."""
     await asyncio.sleep(delay)
     with contextlib.suppress(Exception):
@@ -54,6 +54,18 @@ async def _apply_language(
             language=language,
         )
     await dialog_manager.done()
+
+    # Delete the user's original /language command message
+    start_data = dialog_manager.start_data
+    cmd_msg_id: int | None = (
+        start_data.get("cmd_msg_id") if isinstance(start_data, dict) else None
+    )
+    if cmd_msg_id and callback.message:
+        with contextlib.suppress(Exception):
+            await callback.bot.delete_message(
+                chat_id=callback.message.chat.id,
+                message_id=cmd_msg_id,
+            )
 
     # Send confirmation in the new language, then clean up old dialog message
     if callback.message:
