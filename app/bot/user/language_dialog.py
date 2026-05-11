@@ -48,6 +48,9 @@ async def _apply_language(
     """Persist language choice, close dialog, show auto-deleting confirmation."""
     user = callback.from_user
     start_data = dialog_manager.start_data
+    # Check for parent dialog BEFORE done() pops the stack
+    has_parent = len(dialog_manager.current_stack().intents) > 1
+
     async with get_db_session() as session:
         await UserDAO.update_language(
             session=session,
@@ -74,8 +77,9 @@ async def _apply_language(
         )
         asyncio.create_task(_delete_later(msg))  # noqa: RUF006
 
-        # Remove the old dialog message (shows pre-change language status)
-        if isinstance(callback.message, Message):
+        # Remove the old dialog message only when no parent dialog
+        # (parent dialog needs the message to re-render on)
+        if not has_parent and isinstance(callback.message, Message):
             with contextlib.suppress(Exception):
                 await callback.message.delete()
 
