@@ -8,9 +8,7 @@ _ru = {
     # --- mood dialog ---
     "mood.select_header": "Я сейчас:",
     "mood.selected_header": "Я сейчас: {choices} [{count}/{max}]",
-    "mood.validation_alert": (
-        "Выбрано {current}/{max}. Нужно ровно {max} эмоции."
-    ),
+    "mood.validation_alert": "Пожалуйста, выберите хотя бы 1 эмоцию.",
     "mood.saved_demo": "Запись сохранена! (демо-режим)",
     "mood.emotion_checked": "✔ {item.name}",
     "mood.btn_proceed": "Записать",

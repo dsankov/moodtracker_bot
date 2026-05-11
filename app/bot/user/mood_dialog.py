@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from aiogram.types import CallbackQuery
 
 MAX_EMOTIONS = 3
-SEPARATOR_LINE = "━━" * 15  # fixed-width line to keep dialog bubble constant
+SEPARATOR_LINE = "━━" * 24  # fixed-width line to keep dialog bubble constant
 
 # Check mark shown next to selected emotions.
 # Alternatives: "✔" (\u2714), "☑" (\u2611), "🗸" (\u2713),
@@ -52,7 +52,7 @@ async def on_emotion_toggled(
     dialog_manager: DialogManager,
     item_id: str,
 ) -> None:
-    """Track selection order in dialog_data."""
+    """Track selection order in dialog_data and auto-transition on exact match."""
     ordered: list[str] = dialog_manager.dialog_data.get(
         "ordered_selection",
         [],
@@ -62,6 +62,11 @@ async def on_emotion_toggled(
     else:
         ordered.append(item_id)
     dialog_manager.dialog_data["ordered_selection"] = ordered
+
+    # Auto-transition to confirm when exactly MAX_EMOTIONS selected
+    if len(ordered) == MAX_EMOTIONS:
+        dialog_manager.dialog_data["selected_emotion_ids"] = ordered
+        await dialog_manager.switch_to(state=MoodSG.confirm)
 
 
 async def emotions_getter(
@@ -168,14 +173,9 @@ async def on_proceed_clicked(
         [],
     )
 
-    if len(ordered) != MAX_EMOTIONS:
+    if len(ordered) == 0:
         await callback.answer(
-            text=t(
-                "mood.validation_alert",
-                lang=lang,
-                current=len(ordered),
-                max=MAX_EMOTIONS,
-            ),
+            text=t("mood.validation_alert", lang=lang),
             show_alert=True,
         )
         return
@@ -242,7 +242,7 @@ mood_dialog = Dialog(
             CurrentPage(
                 scroll="emotions_scroll",
                 id="current_page",
-                text=Format("{current_page1}/{pages}"),
+                text=Format("[{current_page1}/{pages}]"),
             ),
             NextPage(
                 scroll="emotions_scroll",

@@ -8,9 +8,7 @@ _en = {
     # --- mood dialog ---
     "mood.select_header": "I am now:",
     "mood.selected_header": "I am now: {choices} [{count}/{max}]",
-    "mood.validation_alert": (
-        "Selected {current}/{max}. Exactly {max} emotions required."
-    ),
+    "mood.validation_alert": "Please select at least 1 emotion.",
     "mood.saved_demo": "Entry saved! (demo mode)",
     "mood.emotion_checked": "✔ {item.name}",
     "mood.btn_proceed": "Record",
