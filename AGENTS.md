@@ -10,6 +10,7 @@ This file provides guidance to agents when working with code in this repository.
 - Docker dev: `make build`, `make up`, `make down`, `make logs`
 - Docker prod: `make prod-build`, `make prod-up`, `make prod-down`, `make prod-logs`
 - Deploy to VPS: `make deploy-prod` (git pull + rebuild + restart)
+- **Always use the project venv**: `.venv/bin/python` for any Python commands (e.g. `.venv/bin/python -c "..."`)
 
 ## Architecture
 
