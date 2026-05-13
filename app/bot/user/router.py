@@ -3,6 +3,7 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram_dialog import DialogManager
+from aiogram_dialog.api.entities import ShowMode
 
 from app.bot.i18n import t
 from app.bot.lang_utils import get_user_lang
@@ -13,21 +14,6 @@ from app.dao.database import get_db_session
 from app.dao.user_dao import UserDAO
 
 router = Router()
-
-
-async def _close_help_if_active(
-    dialog_manager: DialogManager,
-    state: FSMContext,
-) -> bool:
-    """Close help dialog if it's on top of the stack.
-
-    Returns True if help was closed.
-    """
-    current = await state.get_state()
-    if current == HelpSG.main.state:
-        await dialog_manager.done()
-        return True
-    return False
 
 
 @router.message(CommandStart())
@@ -61,9 +47,6 @@ async def cmd_mood(
     state: FSMContext,
 ):
     """Open or resume the mood tracking dialog."""
-    # Close help if active — don't return to it
-    await _close_help_if_active(dialog_manager, state)
-
     current = await state.get_state()
 
     # If mood dialog is already active, don't restart
@@ -86,13 +69,10 @@ async def cmd_help(_message: Message, dialog_manager: DialogManager):
 async def cmd_language(
     message: Message,
     dialog_manager: DialogManager,
-    state: FSMContext,
 ):
     """Show language selection dialog."""
-    # Close help if active — don't return to it
-    await _close_help_if_active(dialog_manager, state)
-
     await dialog_manager.start(
         state=LanguageSG.select,
         data={"cmd_msg_id": message.message_id},
+        show_mode=ShowMode.EDIT,
     )

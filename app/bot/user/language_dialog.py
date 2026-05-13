@@ -1,4 +1,3 @@
-import asyncio
 import contextlib
 
 from aiogram.fsm.state import State, StatesGroup
@@ -33,19 +32,12 @@ async def language_getter(
     }
 
 
-async def _delete_later(message: Message, delay: float = 5.0) -> None:
-    """Delete a bot message after *delay* seconds."""
-    await asyncio.sleep(delay)
-    with contextlib.suppress(Exception):
-        await message.delete()
-
-
 async def _apply_language(
     callback: CallbackQuery,
     dialog_manager: DialogManager,
     language: str,
 ) -> None:
-    """Persist language choice, close dialog, show auto-deleting confirmation."""
+    """Persist language choice and close dialog."""
     user = callback.from_user
     start_data = dialog_manager.start_data
     # Check for parent dialog BEFORE done() pops the stack
@@ -70,18 +62,11 @@ async def _apply_language(
                 message_id=cmd_msg_id,
             )
 
-    # Send auto-deleting confirmation in the new language
-    if callback.message:
-        msg = await callback.message.answer(
-            text=t("language.changed", lang=language),
-        )
-        asyncio.create_task(_delete_later(msg))  # noqa: RUF006
-
-        # Remove the old dialog message only when no parent dialog
-        # (parent dialog needs the message to re-render on)
-        if not has_parent and isinstance(callback.message, Message):
-            with contextlib.suppress(Exception):
-                await callback.message.delete()
+    # Remove the dialog message only when no parent dialog
+    # (parent dialog needs the message to re-render on)
+    if not has_parent and isinstance(callback.message, Message):
+        with contextlib.suppress(Exception):
+            await callback.message.delete()
 
 
 async def on_russian_selected(
