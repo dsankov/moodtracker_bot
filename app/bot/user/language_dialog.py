@@ -51,20 +51,35 @@ async def _apply_language(
         )
     await dialog_manager.done()
 
+    if not callback.message:
+        return
+
+    chat_id = callback.message.chat.id
+
     # Delete the user's original /language command message
     cmd_msg_id: int | None = (
         start_data.get("cmd_msg_id") if isinstance(start_data, dict) else None
     )
-    if cmd_msg_id and callback.message:
+    if cmd_msg_id:
         with contextlib.suppress(Exception):
             await callback.bot.delete_message(
-                chat_id=callback.message.chat.id,
+                chat_id=chat_id,
                 message_id=cmd_msg_id,
             )
 
-    # Remove the dialog message only when no parent dialog
-    # (parent dialog needs the message to re-render on)
-    if not has_parent and isinstance(callback.message, Message):
+    if has_parent:
+        # Delete the old parent dialog message (now orphaned after SEND)
+        parent_msg_id: int | None = (
+            start_data.get("parent_msg_id") if isinstance(start_data, dict) else None
+        )
+        if parent_msg_id:
+            with contextlib.suppress(Exception):
+                await callback.bot.delete_message(
+                    chat_id=chat_id,
+                    message_id=parent_msg_id,
+                )
+    elif isinstance(callback.message, Message):
+        # No parent dialog — delete the language dialog message
         with contextlib.suppress(Exception):
             await callback.message.delete()
 

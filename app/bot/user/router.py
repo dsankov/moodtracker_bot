@@ -3,7 +3,6 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram_dialog import DialogManager
-from aiogram_dialog.api.entities import ShowMode
 
 from app.bot.i18n import t
 from app.bot.lang_utils import get_user_lang
@@ -71,8 +70,12 @@ async def cmd_language(
     dialog_manager: DialogManager,
 ):
     """Show language selection dialog."""
+    stack = dialog_manager.current_stack()
+    parent_msg_id = stack.last_message_id if stack else None
     await dialog_manager.start(
         state=LanguageSG.select,
-        data={"cmd_msg_id": message.message_id},
-        show_mode=ShowMode.EDIT,
+        data={
+            "cmd_msg_id": message.message_id,
+            "parent_msg_id": parent_msg_id,
+        },
     )
